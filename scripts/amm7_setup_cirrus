@@ -1,0 +1,132 @@
+#!/bin/bash
+# Lightweight script to set up AMM7 on CIRRUS
+ 
+display_usage() { 
+   echo
+   echo "  Auto-Config: AMM7 on CIRRUS"
+   echo "  ***************************************"
+   echo
+   echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
+   echo
+   echo "  flags:  -w full path to where nemo will be installed"
+   echo "          -x full path to where xios will be installed"
+   echo "          -s full path to where AMM7 repository resides"
+   echo
+   exit 1
+	} 
+# if less than three arguments supplied, display usage 
+	if [  $# -le 5 ] 
+	then 
+		display_usage
+		exit 1
+	fi 
+# if less than two arguments supplied, display usage 
+	if [  $# -ge 7 ] 
+	then 
+		display_usage
+		exit 1
+	fi 
+# check whether user had supplied -h or --help . If yes display usage 
+	if [[ ( $# == "--help") ||  $# == "-h" ]] 
+	then 
+		display_usage
+		exit 0
+	fi 
+
+while getopts w:x:s: option
+  do
+  case "${option}"
+  in
+  w) export WORK_DIR=${OPTARG};;
+  x) export XIOS_DIR=${OPTARG};;
+  s) export REPO_DIR=${OPTARG};;
+  esac
+done
+
+if [ ${WORK_DIR:0:1} != "/" ]; then
+  echo "WORK_DIR must use full path"
+  exit 1
+fi
+
+if [ ${XIOS_DIR:0:1} != "/" ]; then
+  echo "XIOS_DIR must use full path"
+  exit 1
+fi
+
+if [ ${REPO_DIR:0:1} != "/" ]; then
+  echo "REPO_DIR must use full path"
+  exit 1
+fi
+
+# Change to some working directory of choice
+if [ ! -d "$WORK_DIR" ]; then
+  mkdir $WORK_DIR
+fi
+cd $WORK_DIR
+
+echo "Making sure that the correct modules are loaded"
+
+module purge
+module load intel-compilers-18/18.05.274 netcdf-parallel/4.6.2-intel18-impi18 gcc/6.2.0
+
+# Checkout the NEMO code from the SVN Paris repository 
+echo "Checking out NEMO repository"
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.1 --depth empty nemo
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.1/src --depth infinity nemo/src
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/mk nemo/mk
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.1/cfgs/SHARED nemo/cfgs/SHARED
+svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.1/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/vendors/FCM nemo/ext/FCM
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/vendors/IOIPSL nemo/ext/IOIPSL
+svn export http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/makenemo nemo/makenemo
+mkdir nemo/arch
+
+# Define the location of where the AMM7 forcing files are to be downloaded 
+export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7/EXP00/"
+
+echo $XIOS_DIR
+# Choose an appropriate directory for your XIOS installation
+if [ ! -d "$XIOS_DIR" ]; then
+  mkdir $XIOS_DIR
+fi
+cd $XIOS_DIR
+echo $PWD
+echo "Checking out xios repository"
+svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk@1689 xios
+cd xios
+cp $REPO_DIR/arch/xios/* ./arch
+echo "Compiling xios"
+./make_xios --full --prod --arch cirrus --netcdf_lib netcdf4_par --job 4
+
+# Let's update the path to xios
+export XIOS_DIR=$XIOS_DIR/xios
+
+cd $WORK_DIR/nemo
+cp $REPO_DIR/arch/nemo/* ./arch
+
+echo "Compiling nemo AMM7 Config"
+./makenemo -m cirrus -r ORCA2_ICE_PISCES -j 8
+
+cd cfgs/AMM7/EXP00
+echo "Gathering forcing data"
+wget https://zenodo.org/record/2640723/files/INPUTS_PISCES_v4.0.tar
+wget https://zenodo.org/record/2640723/files/ORCA2_ICE_v4.0.tar
+
+for fn in *.tar; do tar xvf $fn; done
+gunzip *.gz
+
+ln -s $XIOS_DIR/bin/xios_server.exe xios_server.exe
+
+cp $REPO_DIR/EXP00/* ./
+
+echo
+echo "  Auto-Config: AMM7 ZGR"
+echo "  *****************************"
+echo
+echo "  To run the AMM7 ZGR Configuration:"
+echo
+echo "  - update the runscript.pbs accordingly "
+echo "      (project code, nodes, modules, etc)"
+echo
+echo "  - submit via the qsub command"
+echo    
