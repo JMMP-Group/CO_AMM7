@@ -81,6 +81,8 @@ svn co http://forge.ipsl.jussieu.fr/nemo/svn/vendors/IOIPSL nemo/ext/IOIPSL
 svn export http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/makenemo nemo/makenemo
 mkdir nemo/arch
 
+# Setup the directory structure for the ENSEMBLE
+mkdir $WORK_DIR/nemo/cfg/AMM7_zgr
 # Define the location of where the AMM7 forcing files are to be downloaded 
 export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7/EXP00/"
 
