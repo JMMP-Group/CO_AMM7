@@ -1,0 +1,53 @@
+#!/bin/bash
+
+mkdir ../ENSEMBLE_MEMBERS
+n=`cat model_list | wc -l`
+# Set each ENSEMBLE MEMBER directory up
+for i in  $(seq 1 $n); do
+  model=`sed -n $i,$i\p model_list`
+  cd ../ENSEMBLE_MEMBERS
+  mkdir $model
+  cd $model
+  ln -s ../../ENSEMBLE_CONTROL/xios_server.exe xios_server.exe
+  ln -s ../../ENSEMBLE_CONTROL/opa opa
+  ln -s ../../../SHARED/namelist_ref namelist_ref
+  ln -s ../../ENSEMBLE_INPUTS/iodef.xml iodef.xml
+  ln -s ../../ENSEMBLE_INPUTS/field_def.xml field_def.xml
+  ln -s ../../ENSEMBLE_INPUTS/domain_def.xml domain_def.xml
+  ln -s ../../ENSEMBLE_INPUTS/coordinates.skagbdy.nc coordinates.skagbdy.nc
+  ln -s ../../ENSEMBLE_INPUTS/coordinates.nc coordinates.nc
+  ln -s ../../ENSEMBLE_INPUTS/coordinates.bdy.nc coordinates.bdy.nc
+  ln -s ../../ENSEMBLE_INPUTS/bathy_meter.nc bathy_meter.nc
+  ln -s ../../ENSEMBLE_INPUTS/TIDE/ TIDE
+  ln -s ../../ENSEMBLE_INPUTS/RIV/bcc-csm1-1-m RIV
+  ln -s ../../ENSEMBLE_INPUTS/kd490.nc kd490.nc
+  ln -s ../../ENSEMBLE_INPUTS/chlorophyll.nc chlorophyll.nc
+  ln -s ../../ENSEMBLE_INPUTS/BDY_SKAG_CLIM/ BDY_SKAG_CLIM
+  ln -s ../../ENSEMBLE_INPUTS/BDY_SKAG/bcc-csm1-1-m BDY_SKAG
+  ln -s ../../ENSEMBLE_INPUTS/BDY/bcc-csm1-1-m BDY
+  ln -s ../../ENSEMBLE_INPUTS/ATM/bcc-csm1-1-m ATM
+  ln -s ../../ENSEMBLE_INPUTS/IC/ic_bcc-csm2-1-m_y1980.nc inits_m01.nc
+  mkdir meta_out
+  mkdir RESTARTS
+  mkdir OUTPUTS
+  cd ../../ENSEMBLE_CONTROL
+done
+
+mkdir ../ENSEMBLE_INPUTS/RIV
+mkdir ../ENSEMBLE_INPUTS/TIDE
+mkdir ../ENSEMBLE_INPUTS/MESHFILES
+mkdir ../ENSEMBLE_INPUTS/IC
+mkdir ../ENSEMBLE_INPUTS/BDY
+mkdir ../ENSEMBLE_INPUTS/BDY_SKAG
+mkdir ../ENSEMBLE_INPUTS/BDY_SKAG_CLIM
+mkdir ../ENSEMBLE_INPUTS/ATM
+
+for i in  $(seq 1 $n); do
+  model=`sed -n $i,$i\p model_list`
+  mkdir ../ENSEMBLE_INPUTS/RIV/$model
+  mkdir ../ENSEMBLE_INPUTS/BDY/$model
+  mkdir ../ENSEMBLE_INPUTS/BDY_SKAG/$model
+  mkdir ../ENSEMBLE_INPUTS/ATM/$model
+done
+
+echo 'AMM7_RECICLE OPA_SRC' >> ../../cfg.txt

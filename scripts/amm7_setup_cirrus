@@ -84,7 +84,7 @@ mkdir nemo/arch
 # Setup the directory structure for the ENSEMBLE
 mkdir $WORK_DIR/nemo/cfg/AMM7_zgr
 # Define the location of where the AMM7 forcing files are to be downloaded 
-export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7/EXP00/"
+export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7_zgr/EXP00/"
 
 echo $XIOS_DIR
 # Choose an appropriate directory for your XIOS installation
@@ -94,7 +94,7 @@ fi
 cd $XIOS_DIR
 echo $PWD
 echo "Checking out xios repository"
-svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk@1689 xios
+svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1689 xios
 cd xios
 cp $REPO_DIR/arch/xios/* ./arch
 echo "Compiling xios"
@@ -113,6 +113,65 @@ cd cfgs/AMM7/EXP00
 echo "Gathering forcing data"
 wget https://zenodo.org/record/2640723/files/INPUTS_PISCES_v4.0.tar
 wget https://zenodo.org/record/2640723/files/ORCA2_ICE_v4.0.tar
+
+
+
+export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7_zgr
+
+mkdir $CONFIG_DIR/ENSEMBLE_MEMBERS
+n=`cat $REPO_DIR/scripts/model_list | wc -l`
+# Set each ENSEMBLE MEMBER directory up
+for i in  $(seq 1 $n); do
+  model=`sed -n $i,$i\p $REPO_DIR/scripts/model_list`
+  cd $CONFIG_DIR/ENSEMBLE_MEMBERS
+  mkdir $model
+  cd $model
+  ln -s ../../EXP00/xios_server.exe xios_server.exe
+  ln -s ../../EXP00/opa opa
+  ln -s ../../../SHARED/namelist_ref namelist_ref
+  ln -s ../../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
+  ln -s ../../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
+  ln -s ../../../SHARED/domain_def_nemo-oce.xml domain_def_nemo-oce.xml
+  ln -s ../../ENSEMBLE_INPUTS/iodef.xml iodef.xml
+  ln -s ../../ENSEMBLE_INPUTS/file_def.xml file_def.xml
+  ln -s ../../ENSEMBLE_INPUTS/context_nemo.xml context_nemo.xml
+  ln -s ../../ENSEMBLE_INPUTS/coordinates.skagbdy.nc coordinates.skagbdy.nc
+  ln -s ../../ENSEMBLE_INPUTS/coordinates.bdy.nc coordinates.bdy.nc
+  ln -s ../../ENSEMBLE_INPUTS/DOM/$model\_domain_cfg.nc domain_cfg.nc
+  ln -s ../../ENSEMBLE_INPUTS/TIDE TIDE
+  ln -s ../../ENSEMBLE_INPUTS/RIV RIV
+  ln -s ../../ENSEMBLE_INPUTS/kd490.nc kd490.nc
+  ln -s ../../ENSEMBLE_INPUTS/chlorophyll.nc chlorophyll.nc
+  ln -s ../../ENSEMBLE_INPUTS/BDY_SKAG BDY_SKAG
+  ln -s ../../ENSEMBLE_INPUTS/BDY BDY
+  ln -s ../../ENSEMBLE_INPUTS/ATM ATM
+  ln -s ../../ENSEMBLE_INPUTS/IC/inits_m01.nc inits_m01.nc
+  mkdir meta_out
+  mkdir RESTARTS
+  mkdir OUTPUTS
+done
+
+mkdir ../ENSEMBLE_INPUTS/RIV
+mkdir ../ENSEMBLE_INPUTS/TIDE
+mkdir ../ENSEMBLE_INPUTS/IC
+mkdir ../ENSEMBLE_INPUTS/BDY
+mkdir ../ENSEMBLE_INPUTS/BDY_SKAG
+mkdir ../ENSEMBLE_INPUTS/DOM
+mkdir ../ENSEMBLE_INPUTS/ATM
+
+for i in  $(seq 1 $n); do
+  model=`sed -n $i,$i\p $REPO_DIR/scripts/model_list`
+  mkdir ../ENSEMBLE_INPUTS/RIV/$model
+  mkdir ../ENSEMBLE_INPUTS/BDY/$model
+  mkdir ../ENSEMBLE_INPUTS/BDY_SKAG/$model
+  mkdir ../ENSEMBLE_INPUTS/ATM/$model
+done
+
+echo 'AMM7_zgr OPA_SRC' >> ../../cfg.txt
+
+
+
+
 
 for fn in *.tar; do tar xvf $fn; done
 gunzip *.gz

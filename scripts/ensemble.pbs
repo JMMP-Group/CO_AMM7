@@ -1,0 +1,109 @@
+#PBS -N AMM7_ENS2
+#PBS -l select=32
+#PBS -l walltime=24:00:00
+#PBS -A n01-ORCHESTRA
+
+## PBS_O_WORKDIR = directory from which the batch job is launched.
+echo "PBS_O_WORKDIR = " $PBS_O_WORKDIR
+cd $PBS_O_WORKDIR
+export NPROC=`qstat -f $PBS_JOBID | grep mppwidth | awk '{print $3}'`
+echo "Running on $NPROC cores"
+
+OCEANCORES=146
+XIOCORES=1
+
+export OMP_NUM_THREADS=1
+
+ulimit -c unlimited
+ulimit -s unlimited
+
+date
+
+for year in {2049..2056}
+do
+
+# Array pretending to be a Pythonic dictionary
+ARRAY=( "bcc-csm1-1-m:40"
+        "CanESM2:40"
+        "CNRM-CM5:42" 
+        "MIROC-ESM:44" )
+
+
+for ens in "${ARRAY[@]}"
+do
+
+  rdt=300
+  bar=40
+  nam="${ens%%:*}"
+  jpk="${ens##*:}"
+
+  if [ $year -eq 1980 ]
+  then
+    tst=1
+    rst=".false."
+  else
+    tst=`./end_time_step $(( $year - 1 )) $rdt` ; rs0=`printf "%08d" $tst`; tst=$(( $tst +1 ))
+    rst=".true."
+  fi
+  ten=`./end_time_step $year $rdt`
+  sed "s/XXX_EXP_XXX/$nam/g" ../ENSEMBLE_INPUTS/namelist_cfg_template > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_TST_XXX/$tst/g" namelist                                 > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_RS0_XXX/$nam\_$rs0\_restart/g" namelist                                 > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_YEAR_XXX/$year/g" namelist                                 > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_TEN_XXX/$ten/g" namelist                                 > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_RDT_XXX/$rdt/g" namelist                                 > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_JPK_XXX/$jpk/g" namelist                                 > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_MDL_XXX/$nam\_rcp85/g" namelist                          > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_RST_XXX/$rst/g" namelist                                 > tmp_out ; mv tmp_out ../ENSEMBLE_MEMBERS/ENS_$nam/namelist_cfg
+  rm namelist
+
+done
+
+for ens in "${ARRAY[@]}"
+do
+  xp="${ens%%:*}"
+  cd $PBS_O_WORKDIR/../ENSEMBLE_MEMBERS/ENS_$xp
+  pwd
+  echo "aprun -b -n $XIOCORES -N 1 ./xios_server.exe : -n $OCEANCORES -N 24 ./opa &"
+  cp namelist_cfg meta_out/namelist.$year
+  aprun -b -n $OCEANCORES -N 24 ./opa   >&  stdouterr_nemo : -n $XIOCORES -N 1 ./xios_server.exe >&  stdouterr_xios &
+  echo $xp
+  date
+done
+
+wait
+date
+
+cd $PBS_O_WORKDIR
+for ens in "${ARRAY[@]}"
+do
+  xp="${ens%%:*}"
+  cd $PBS_O_WORKDIR/../ENSEMBLE_MEMBERS/ENS_$xp
+  mkdir OUTPUTS_final_v3
+  mv *_1?_*grid*.nc OUTPUTS_final_v3 &
+  echo $xp
+  date
+
+done
+wait
+
+cd $PBS_O_WORKDIR
+done
+
+qsub ensemble.pbs.multiyear_3
+exit
+
+#current_stp=`sed -n 1,1p time.step`
+#if [ ! $current_stp -eq $ten ]
+#then 
+#    exit
+#  fi
+
+#  cp ocean.output meta_out/ocean.output.$year
+#  cp namelist_ice meta_out/namelist_ice.$year
+#  cp solver.stat meta_out/solver.stat.$year
+#  cp time.step meta_out/time.step.$year
+
+#  SCRIPTS/rst_lnk $NPROC $current_stp $nam
+#  SCRIPTS/rst_lnk_ice $NPROC $current_stp $nam
+
