@@ -67,7 +67,7 @@ cd $WORK_DIR
 echo "Making sure that the correct modules are loaded"
 
 module purge
-module load intel-compilers-18/18.05.274 netcdf-parallel/4.6.2-intel18-impi18 gcc/6.2.0
+module load intel-compilers-18/18.05.274 netcdf-parallel/4.6.2-intel18-impi18 
 
 # Checkout the NEMO code from the SVN Paris repository 
 echo "Checking out NEMO repository"
@@ -94,7 +94,7 @@ fi
 cd $XIOS_DIR
 echo $PWD
 echo "Checking out xios repository"
-svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1689 xios
+svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1627 xios
 cd xios
 cp $REPO_DIR/arch/xios/* ./arch
 echo "Compiling xios"
@@ -106,12 +106,9 @@ export XIOS_DIR=$XIOS_DIR/xios
 cd $WORK_DIR/nemo
 cp $REPO_DIR/arch/nemo/* ./arch
 
-echo 'AMM7 OPA_SRC' >> ../../cfg.txt
+echo 'AMM7 OPA_SRC' >> $WORK_DIR/nemo/cfg/work_cfgs.txt
 
-echo "Compiling nemo AMM7 Config"
-./makenemo -m cirrus -r AMM7 -j 8
-
-cd cfgs/AMM7/EXP00
+mkdir cfgs/AMM7/EXP00
 echo "Gathering forcing data"
 
 export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7
@@ -160,6 +157,13 @@ mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/ATM
 ln -s $XIOS_DIR/bin/xios_server.exe $CONFIG_DIR/EXP00/xios_server.exe
 
 cp $REPO_DIR/EXP00/* $CONFIG_DIR/EXP00/
+cp -r $REPO_DIR/MY_SRC $CONFIG_DIR
+cp $REPO_DIR/cpp_AMM7.fcm $CONFIG_DIR/
+
+cd $WORK_DIR/nemo
+
+echo "Compiling nemo AMM7 Config"
+./makenemo -m cirrus -r AMM7 -j 8
 
 echo
 echo "  Auto-Config: AMM7"
