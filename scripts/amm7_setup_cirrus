@@ -82,9 +82,9 @@ svn export http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/makenemo nemo/maken
 mkdir nemo/arch
 
 # Setup the directory structure for the ENSEMBLE
-mkdir $WORK_DIR/nemo/cfg/AMM7_zgr
+mkdir $WORK_DIR/nemo/cfg/AMM7
 # Define the location of where the AMM7 forcing files are to be downloaded 
-export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7_zgr/EXP00/"
+export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7/EXP00/"
 
 echo $XIOS_DIR
 # Choose an appropriate directory for your XIOS installation
@@ -106,17 +106,15 @@ export XIOS_DIR=$XIOS_DIR/xios
 cd $WORK_DIR/nemo
 cp $REPO_DIR/arch/nemo/* ./arch
 
+echo 'AMM7 OPA_SRC' >> ../../cfg.txt
+
 echo "Compiling nemo AMM7 Config"
-./makenemo -m cirrus -r ORCA2_ICE_PISCES -j 8
+./makenemo -m cirrus -r AMM7 -j 8
 
 cd cfgs/AMM7/EXP00
 echo "Gathering forcing data"
-wget https://zenodo.org/record/2640723/files/INPUTS_PISCES_v4.0.tar
-wget https://zenodo.org/record/2640723/files/ORCA2_ICE_v4.0.tar
 
-
-
-export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7_zgr
+export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7
 
 mkdir $CONFIG_DIR/ENSEMBLE_MEMBERS
 n=`cat $REPO_DIR/scripts/model_list | wc -l`
@@ -151,40 +149,23 @@ for i in  $(seq 1 $n); do
   mkdir OUTPUTS
 done
 
-mkdir ../ENSEMBLE_INPUTS/RIV
-mkdir ../ENSEMBLE_INPUTS/TIDE
-mkdir ../ENSEMBLE_INPUTS/IC
-mkdir ../ENSEMBLE_INPUTS/BDY
-mkdir ../ENSEMBLE_INPUTS/BDY_SKAG
-mkdir ../ENSEMBLE_INPUTS/DOM
-mkdir ../ENSEMBLE_INPUTS/ATM
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/RIV
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/TIDE
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/IC
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/BDY
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/BDY_SKAG
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/DOM
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/ATM
 
-for i in  $(seq 1 $n); do
-  model=`sed -n $i,$i\p $REPO_DIR/scripts/model_list`
-  mkdir ../ENSEMBLE_INPUTS/RIV/$model
-  mkdir ../ENSEMBLE_INPUTS/BDY/$model
-  mkdir ../ENSEMBLE_INPUTS/BDY_SKAG/$model
-  mkdir ../ENSEMBLE_INPUTS/ATM/$model
-done
+ln -s $XIOS_DIR/bin/xios_server.exe $CONFIG_DIR/EXP00/xios_server.exe
 
-echo 'AMM7_zgr OPA_SRC' >> ../../cfg.txt
-
-
-
-
-
-for fn in *.tar; do tar xvf $fn; done
-gunzip *.gz
-
-ln -s $XIOS_DIR/bin/xios_server.exe xios_server.exe
-
-cp $REPO_DIR/EXP00/* ./
+cp $REPO_DIR/EXP00/* $CONFIG_DIR/EXP00/
 
 echo
-echo "  Auto-Config: AMM7 ZGR"
+echo "  Auto-Config: AMM7"
 echo "  *****************************"
 echo
-echo "  To run the AMM7 ZGR Configuration:"
+echo "  To run the AMM7 Configuration:"
 echo
 echo "  - update the runscript.pbs accordingly "
 echo "      (project code, nodes, modules, etc)"
