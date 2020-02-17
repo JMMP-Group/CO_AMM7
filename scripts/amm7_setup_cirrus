@@ -68,6 +68,7 @@ echo "Making sure that the correct modules are loaded"
 
 module purge
 module load intel-compilers-18/18.05.274 netcdf-parallel/4.6.2-intel18-impi18 
+export HDF5_DIR='/lustre/sw/hdf5parallel/1.10.4-intel18-impi18'
 
 # Checkout the NEMO code from the SVN Paris repository 
 echo "Checking out NEMO repository"
@@ -82,7 +83,7 @@ svn export http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/makenemo nemo/maken
 mkdir nemo/arch
 
 # Setup the directory structure for the ENSEMBLE
-mkdir $WORK_DIR/nemo/cfg/AMM7
+mkdir $WORK_DIR/nemo/cfgs/AMM7
 # Define the location of where the AMM7 forcing files are to be downloaded 
 export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7/EXP00/"
 
@@ -106,7 +107,7 @@ export XIOS_DIR=$XIOS_DIR/xios
 cd $WORK_DIR/nemo
 cp $REPO_DIR/arch/nemo/* ./arch
 
-echo 'AMM7 OPA_SRC' >> $WORK_DIR/nemo/cfg/work_cfgs.txt
+echo 'AMM7 OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
 
 mkdir cfgs/AMM7/EXP00
 echo "Gathering forcing data"
@@ -146,6 +147,7 @@ for i in  $(seq 1 $n); do
   mkdir OUTPUTS
 done
 
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/RIV
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/TIDE
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/IC
