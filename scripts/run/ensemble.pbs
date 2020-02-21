@@ -48,8 +48,8 @@ do
   ten=`./end_time_step $year $rdt`
   sed "s/XXX_EXP_XXX/$nam/g" ../ENSEMBLE_INPUTS/namelist_cfg_template > tmp_out ; mv tmp_out namelist
   sed "s/XXX_TST_XXX/$tst/g" namelist                                 > tmp_out ; mv tmp_out namelist
-  sed "s/XXX_RS0_XXX/$nam\_$rs0\_restart/g" namelist                                 > tmp_out ; mv tmp_out namelist
-  sed "s/XXX_YEAR_XXX/$year/g" namelist                                 > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_RS0_XXX/$nam\_$rs0\_restart/g" namelist                  > tmp_out ; mv tmp_out namelist
+  sed "s/XXX_YEAR_XXX/$year/g" namelist                               > tmp_out ; mv tmp_out namelist
   sed "s/XXX_TEN_XXX/$ten/g" namelist                                 > tmp_out ; mv tmp_out namelist
   sed "s/XXX_RDT_XXX/$rdt/g" namelist                                 > tmp_out ; mv tmp_out namelist
   sed "s/XXX_JPK_XXX/$jpk/g" namelist                                 > tmp_out ; mv tmp_out namelist
@@ -80,8 +80,7 @@ for ens in "${ARRAY[@]}"
 do
   xp="${ens%%:*}"
   cd $PBS_O_WORKDIR/../ENSEMBLE_MEMBERS/ENS_$xp
-  mkdir OUTPUTS_final_v3
-  mv *_1?_*grid*.nc OUTPUTS_final_v3 &
+  mv *_1?_*grid*.nc OUTPUTS &
   echo $xp
   date
 
@@ -91,20 +90,4 @@ wait
 cd $PBS_O_WORKDIR
 done
 
-qsub ensemble.pbs.multiyear_3
 exit
-
-#current_stp=`sed -n 1,1p time.step`
-#if [ ! $current_stp -eq $ten ]
-#then 
-#    exit
-#  fi
-
-#  cp ocean.output meta_out/ocean.output.$year
-#  cp namelist_ice meta_out/namelist_ice.$year
-#  cp solver.stat meta_out/solver.stat.$year
-#  cp time.step meta_out/time.step.$year
-
-#  SCRIPTS/rst_lnk $NPROC $current_stp $nam
-#  SCRIPTS/rst_lnk_ice $NPROC $current_stp $nam
-
