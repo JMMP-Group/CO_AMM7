@@ -15,7 +15,6 @@ MODULE usrdef_sbc
    USE oce            ! ocean dynamics and tracers
    USE dom_oce        ! ocean space and time domain
    USE sbc_oce        ! Surface boundary condition: ocean fields
-   USE sbc_ice         ! Surface boundary condition: ice fields
    USE phycst         ! physical constants
    !
    USE in_out_manager ! I/O manager
@@ -46,7 +45,7 @@ CONTAINS
       !! ** Purpose :   provide at each time-step the surface boundary
       !!              condition, i.e. the momentum, heat and freshwater fluxes.
       !!
-      !! ** Method  :   all 0 fields, for ISOMIP case
+      !! ** Method  :   all 0 fields, for AMM7 case
       !!                CAUTION : never mask the surface stress field !
       !!
       !! ** Action  : - set to ZERO all the ocean surface boundary condition, i.e.   
@@ -58,7 +57,7 @@ CONTAINS
       !
       IF( kt == nit000 ) THEN
          !
-         IF(lwp) WRITE(numout,*)' usr_sbc : ISOMIP case: NO surface forcing'
+         IF(lwp) WRITE(numout,*)' usr_sbc : AMM7 case: NO surface forcing'
          IF(lwp) WRITE(numout,*)' ~~~~~~~~~~~   utau = vtau = taum = wndm = qns = qsr = emp = sfx = 0'
          !
          utau(:,:) = 0._wp
