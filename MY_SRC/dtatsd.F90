@@ -33,7 +33,7 @@ MODULE dtatsd
    LOGICAL , PUBLIC ::   ln_tsd_init   !: T & S data flag
    LOGICAL , PUBLIC ::   ln_tsd_interp !: vertical interpolation flag
    LOGICAL , PUBLIC ::   ln_tsd_dmp    !: internal damping toward input data flag
-   LOGICAL , PUBLIC ::   rn_tsd_zone    !: 1=AMM7 July off-shelf, 2=AMM7 July on-shelf, 3=AMM7 Jan off-shelf, 4=AMM7 Jan on-shelf
+   INTEGER , PUBLIC ::   nn_tsd_zone    !: 1=AMM7 July on-shelf, 2=AMM7 July off-shelf, 3=AMM7 Jan on-shelf, 4=AMM7 Jan off-shelf
 
    TYPE(FLD), ALLOCATABLE, DIMENSION(:) ::   sf_tsd   ! structure of input SST (file informations, fields read)
    INTEGER                                 ::   jpk_init , inum_dta
@@ -66,7 +66,7 @@ CONTAINS
       TYPE(FLD_N)                   ::   sn_tem, sn_sal, sn_dep, sn_msk
       
       !!
-      NAMELIST/namtsd/   ln_tsd_init, ln_tsd_interp, ln_tsd_dmp, cn_dir, sn_tem, sn_sal, sn_dep, sn_msk
+      NAMELIST/namtsd/   ln_tsd_init, ln_tsd_interp, ln_tsd_dmp, cn_dir, sn_tem, sn_sal, sn_dep, sn_msk, nn_zone
       !!----------------------------------------------------------------------
       !
       !  Initialisation
