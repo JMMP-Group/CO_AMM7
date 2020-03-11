@@ -66,7 +66,7 @@ CONTAINS
       TYPE(FLD_N)                   ::   sn_tem, sn_sal, sn_dep, sn_msk
       
       !!
-      NAMELIST/namtsd/   ln_tsd_init, ln_tsd_interp, ln_tsd_dmp, cn_dir, sn_tem, sn_sal, sn_dep, sn_msk, nn_zone
+      NAMELIST/namtsd/   ln_tsd_init, ln_tsd_interp, ln_tsd_dmp, cn_dir, sn_tem, sn_sal, sn_dep, sn_msk, nn_tsd_zone
       !!----------------------------------------------------------------------
       !
       !  Initialisation
