@@ -124,10 +124,10 @@ ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
 wget http://gws-access.ceda.ac.uk/public/jmmp_colab/AMM7/cfgs/domain_cfg.nc
 
 mkdir $CONFIG_DIR/ENSEMBLE_MEMBERS
-n=`cat $REPO_DIR/scripts/model_list | wc -l`
+n=`cat $REPO_DIR/scripts/setup/model_list | wc -l`
 # Set each ENSEMBLE MEMBER directory up
 for i in  $(seq 1 $n); do
-  model=`sed -n $i,$i\p $REPO_DIR/scripts/model_list`
+  model=`sed -n $i,$i\p $REPO_DIR/scripts/setup/model_list`
   cd $CONFIG_DIR/ENSEMBLE_MEMBERS
   mkdir $model
   cd $model
