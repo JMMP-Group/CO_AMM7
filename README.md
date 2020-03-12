@@ -1,7 +1,7 @@
 # AMM7_zgr
 AMM7 configuration for testing various vertical coordinate options
 
-##Quick Start:
+## Quick Start:
 
 ```
 git clone git@github.com:JMMP-Group/AMM7_zgr.git
@@ -13,4 +13,4 @@ Edit the project code in  `runscript.pbs` then:
 qsub -q short runscript.pbs
 ```
 
-~to follow~: setting up the ensemble experiments
+_to follow_: setting up the ensemble experiments
