@@ -114,6 +114,15 @@ echo "Gathering forcing data"
 
 export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7
 
+# Set up EXP00 for quick testing of the unforced case
+
+cd $CONFIG_DIR/EXP00
+ln -s ../../SHARED/namelist_ref namelist_ref
+ln -s ../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
+ln -s ../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
+ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
+wget http://gws-access.ceda.ac.uk/public/jmmp_colab/AMM7/cfgs/domain_cfg.nc
+
 mkdir $CONFIG_DIR/ENSEMBLE_MEMBERS
 n=`cat $REPO_DIR/scripts/model_list | wc -l`
 # Set each ENSEMBLE MEMBER directory up
@@ -147,12 +156,6 @@ for i in  $(seq 1 $n); do
   mkdir OUTPUTS
 done
 
-# Set up EXP00 for quick testing of the unforced case
-
-ln -s ../../SHARED/namelist_ref namelist_ref
-ln -s ../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
-ln -s ../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
-ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
 
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/RIV
@@ -165,6 +168,7 @@ mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/ATM
 
 ln -s $XIOS_DIR/bin/xios_server.exe $CONFIG_DIR/EXP00/xios_server.exe
 
+cp $REPO_DIR/EXP00/namelist_ref $CONFIG_DIR/../SHARED/
 cp $REPO_DIR/EXP00/* $CONFIG_DIR/EXP00/
 cp -r $REPO_DIR/MY_SRC $CONFIG_DIR
 cp $REPO_DIR/cpp_AMM7.fcm $CONFIG_DIR/
