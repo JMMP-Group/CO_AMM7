@@ -50,6 +50,7 @@ CONTAINS
       REAL(wp), DIMENSION(jpi,jpj)         , INTENT(  out) ::   pssh    ! sea-surface height
       !
       REAL(wp), DIMENSION(42)  ::   zdep, zsal, ztem
+      REAL(wp) :: a0, a1, a2, b0, b1, b2
       INTEGER :: ji, jj, jk  ! dummy loop indices
       !!----------------------------------------------------------------------
       !
@@ -160,17 +161,34 @@ CONTAINS
                          & 34.9598, 34.9527, 34.9502, 34.9474, 34.9436, 34.9397, &
                          & 34.9379, 34.9378, 34.9388, 34.9398, 34.9407, 34.9413  &
                          & /)
-
+         CASE(5) ! Analytic T/S July on-shelf
+            a0 = 13.0
+            a1 = 0.00507078656
+            a2 = 2.37539619
+            b0 = -1.1 
+            b1 = 0.01 
+            b2 = 34.85 
       END SELECT
 
+      IF (nn_tsd_zone < 5) THEN  ! Use spline smoothing
     ! DO jk = 1, jpk             ! horizontally uniform T & S profiles
          DO jj = 1, jpj
             DO ji = 1, jpi
                pts(ji,jj,:,jp_tem) = spline3(zdep,ztem,pdept(ji,jj,:)) * ptmask(ji,jj,:)
-               pts(ji,jj,:,jp_sal) = spline3(zdep,zsal,pdept(ji,jj,:)) * ptmask(ji,jj,:) 
+               pts(ji,jj,:,jp_sal) = spline3(zdep,zsal,pdept(ji,jj,:)) * ptmask(ji,jj,:)
             END DO
          END DO
     ! END DO
+      ELSE  ! Use an analytic function
+         DO jj = 1, jpj
+            DO ji = 1, jpi
+               pts(ji,jj,:,jp_tem) = ( a0 * exp( -a1 * pdept(ji,jj,:) ) + a2 ) * ptmask(ji,jj,:)
+               pts(ji,jj,:,jp_sal) = ( b0 * exp( -b1 * pdept(ji,jj,:) ) + b2 ) * ptmask(ji,jj,:) 
+            END DO
+         END DO
+
+      END IF
+
    END SUBROUTINE usr_def_istate
 
    !!======================================================================
