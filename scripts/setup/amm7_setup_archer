@@ -72,11 +72,11 @@ module load cray-netcdf-hdf5parallel
 
 # Checkout the NEMO code from the SVN Paris repository 
 echo "Checking out NEMO repository"
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.2 --depth empty nemo
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.2/src --depth infinity nemo/src
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2 --depth empty nemo
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2/src --depth infinity nemo/src
 svn co http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/mk nemo/mk
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.2/cfgs/SHARED nemo/cfgs/SHARED
-svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0.2/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2/cfgs/SHARED nemo/cfgs/SHARED
+svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
 svn co http://forge.ipsl.jussieu.fr/nemo/svn/vendors/FCM nemo/ext/FCM
 svn co http://forge.ipsl.jussieu.fr/nemo/svn/vendors/IOIPSL nemo/ext/IOIPSL
 svn export http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/makenemo nemo/makenemo
