@@ -18,4 +18,4 @@ _to follow_: setting up the ensemble experiments
 
 forcing data:
 
-[JMMP-COLLAB](http://gws-access.ceda.ac.uk/public/jmmp_colab/)
+[JMMP-COLLAB](http://gws-access.ceda.ac.uk/public/jmmp_collab/)
