@@ -72,20 +72,12 @@ module load cray-netcdf-hdf5parallel
 
 # Checkout the NEMO code from the SVN Paris repository 
 echo "Checking out NEMO repository"
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2 --depth empty nemo
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2/src --depth infinity nemo/src
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/mk nemo/mk
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2/cfgs/SHARED nemo/cfgs/SHARED
-svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/vendors/FCM nemo/ext/FCM
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/vendors/IOIPSL nemo/ext/IOIPSL
-svn export http://forge.ipsl.jussieu.fr/nemo/svn/utils/build/makenemo nemo/makenemo
-mkdir nemo/arch
+svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-3.6/NEMOGCM nemo
 
 # Setup the directory structure for the ENSEMBLE
-mkdir $WORK_DIR/nemo/cfgs/AMM7
+mkdir $WORK_DIR/nemo/CONFIG/AMM7
 # Define the location of where the AMM7 forcing files are to be downloaded 
-export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7/EXP00/"
+export DOWNLOAD_DIR="$WORK_DIR/nemo/CONFIG/AMM7/EXP00/"
 
 echo $XIOS_DIR
 # Choose an appropriate directory for your XIOS installation
@@ -95,7 +87,7 @@ fi
 cd $XIOS_DIR
 echo $PWD
 echo "Checking out xios repository"
-svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1627 xios
+svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-1.0@703 xios 
 cd xios
 cp $REPO_DIR/arch/xios/* ./arch
 echo "Compiling xios"
@@ -105,75 +97,31 @@ echo "Compiling xios"
 export XIOS_DIR=$XIOS_DIR/xios
 
 cd $WORK_DIR/nemo
-cp $REPO_DIR/arch/nemo/* ./arch
+cp $REPO_DIR/arch/nemo/* ./ARCH
 
-echo 'AMM7 OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+echo 'AMM7 OCE' >> $WORK_DIR/nemo/CONFIG/cfgs.txt
 
-mkdir cfgs/AMM7/EXP00
+mkdir CONFIG/AMM7/EXP00
 echo "Gathering forcing data"
 
-export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7
+export CONFIG_DIR=$WORK_DIR/nemo/CONFIG/AMM7
 
 # Set up EXP00 for quick testing of the unforced case
 
 cd $CONFIG_DIR/EXP00
 ln -s ../../SHARED/namelist_ref namelist_ref
-ln -s ../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
-ln -s ../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
-ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
+ln -s ../../SHARED/field_def.xml field_def.xml
+ln -s ../../SHARED/domain_def.xml domain_def.xml
 wget http://gws-access.ceda.ac.uk/public/jmmp_colab/AMM7/cfgs/domain_cfg.nc
 
-mkdir $CONFIG_DIR/ENSEMBLE_MEMBERS
-n=`cat $REPO_DIR/scripts/setup/model_list | wc -l`
-# Set each ENSEMBLE MEMBER directory up
-for i in  $(seq 1 $n); do
-  model=`sed -n $i,$i\p $REPO_DIR/scripts/setup/model_list`
-  cd $CONFIG_DIR/ENSEMBLE_MEMBERS
-  mkdir $model
-  cd $model
-  ln -s ../../EXP00/xios_server.exe xios_server.exe
-  ln -s ../../EXP00/opa nemo
-  ln -s ../../../SHARED/namelist_ref namelist_ref
-  ln -s ../../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
-  ln -s ../../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
-  ln -s ../../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
-  ln -s ../../ENSEMBLE_INPUTS/iodef.xml iodef.xml
-  ln -s ../../ENSEMBLE_INPUTS/file_def.xml file_def.xml
-  ln -s ../../ENSEMBLE_INPUTS/context_nemo.xml context_nemo.xml
-  ln -s ../../ENSEMBLE_INPUTS/coordinates.skagbdy.nc coordinates.skagbdy.nc
-  ln -s ../../ENSEMBLE_INPUTS/coordinates.bdy.nc coordinates.bdy.nc
-  ln -s ../../ENSEMBLE_INPUTS/DOM/$model\_domain_cfg.nc domain_cfg.nc
-  ln -s ../../ENSEMBLE_INPUTS/TIDE TIDE
-  ln -s ../../ENSEMBLE_INPUTS/RIV RIV
-  ln -s ../../ENSEMBLE_INPUTS/kd490.nc kd490.nc
-  ln -s ../../ENSEMBLE_INPUTS/chlorophyll.nc chlorophyll.nc
-  ln -s ../../ENSEMBLE_INPUTS/BDY_SKAG BDY_SKAG
-  ln -s ../../ENSEMBLE_INPUTS/BDY BDY
-  ln -s ../../ENSEMBLE_INPUTS/ATM ATM
-  ln -s ../../ENSEMBLE_INPUTS/IC/initcd_y2005m01.nc initcd_y2005m01.nc
-  mkdir meta_out
-  mkdir RESTARTS
-  mkdir OUTPUTS
-done
-
-
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/RIV
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/TIDE
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/IC
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/BDY
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/BDY_SKAG
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/DOM
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/ATM
 
 ln -s $XIOS_DIR/bin/xios_server.exe $CONFIG_DIR/EXP00/xios_server.exe
 
-cp $REPO_DIR/EXP00/namelist_ref $CONFIG_DIR/../SHARED/
 cp $REPO_DIR/EXP00/* $CONFIG_DIR/EXP00/
 cp -r $REPO_DIR/MY_SRC $CONFIG_DIR
 cp $REPO_DIR/cpp_AMM7.fcm $CONFIG_DIR/
 
-cd $WORK_DIR/nemo
+cd $WORK_DIR/nemo/CONFIG
 
 echo "Compiling nemo AMM7 Config"
 ./makenemo -m archer -r AMM7 -j 8
