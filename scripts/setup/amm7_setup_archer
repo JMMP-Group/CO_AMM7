@@ -99,7 +99,7 @@ export XIOS_DIR=$XIOS_DIR/xios
 cd $WORK_DIR/nemo
 cp $REPO_DIR/arch/nemo/* ./ARCH
 
-echo 'AMM7 OCE' >> $WORK_DIR/nemo/CONFIG/cfgs.txt
+echo 'AMM7 OPA_SRC' >> $WORK_DIR/nemo/CONFIG/cfg.txt
 
 mkdir CONFIG/AMM7/EXP00
 echo "Gathering forcing data"
@@ -124,7 +124,7 @@ cp $REPO_DIR/cpp_AMM7.fcm $CONFIG_DIR/
 cd $WORK_DIR/nemo/CONFIG
 
 echo "Compiling nemo AMM7 Config"
-./makenemo -m archer -r AMM7 -j 8
+./makenemo -m archer -n AMM7 -j 8
 
 echo
 echo "  Auto-Config: AMM7"
