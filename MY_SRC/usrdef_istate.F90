@@ -162,12 +162,12 @@ CONTAINS
                          & 34.9379, 34.9378, 34.9388, 34.9398, 34.9407, 34.9413  &
                          & /)
          CASE(5) ! Analytic T/S July on-shelf
-            a0 = 13.0
-            a1 = 0.00507078656
-            a2 = 2.37539619
-            b0 = -1.1 
-            b1 = 0.01 
-            b2 = 34.85 
+           ! a0 = 13.0
+           ! a1 = 0.00507078656
+           ! a2 = 2.37539619
+           ! b0 = -1.1 
+           ! b1 = 0.01 
+           ! b2 = 34.85 
       END SELECT
 
       IF (nn_tsd_zone < 5) THEN  ! Use spline smoothing
@@ -182,8 +182,11 @@ CONTAINS
       ELSE  ! Use an analytic function
          DO jj = 1, jpj
             DO ji = 1, jpi
-               pts(ji,jj,:,jp_tem) = ( a0 * exp( -a1 * pdept(ji,jj,:) ) + a2 ) * ptmask(ji,jj,:)
-               pts(ji,jj,:,jp_sal) = ( b0 * exp( -b1 * pdept(ji,jj,:) ) + b2 ) * ptmask(ji,jj,:) 
+               pts(ji,jj,:,jp_sal) = rn_sal_sf
+               pts(ji,jj,:,jp_tem) = rn_c0_sf * ( 1-tanh( ( (pdept(ji,jj,:)-rn_mld_sf)/20 )*3.1415927/180 ) ) &
+                                   + rn_c1_sf * ( ( rn_maxdep_sf - pdept(ji,jj,:) ) / rn_maxdep_sf ) 
+               !pts(ji,jj,:,jp_tem) = ( a0 * exp( -a1 * pdept(ji,jj,:) ) + a2 ) * ptmask(ji,jj,:)
+               !pts(ji,jj,:,jp_sal) = ( b0 * exp( -b1 * pdept(ji,jj,:) ) + b2 ) * ptmask(ji,jj,:) 
             END DO
          END DO
 
