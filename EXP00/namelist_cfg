@@ -5,22 +5,22 @@
 &namrun        !   parameters of the run
 !-----------------------------------------------------------------------
    nn_no       =       0   !  job number (no more used...)
-   cn_exp      =  "HadGEM2-ES_H"  !  experience name
-   nn_it000 = 210529
-   nn_itend = 315648
-   nn_date0 = 19800101
+   cn_exp      =  "exp_prj_sf_L51_r24"  !  experience name
+   nn_it000 = 1 
+   nn_itend = 8640
+   nn_date0 = 20050101
    nn_rstctl = 2 !  restart control = 0 nit000 is not compared to the restart file value
                  !                  = 1 use ndate0 in namelist (not the value in the restart file)
                  !                  = 2 calendar parameters read in the restart file
    nn_leapy    =       1   !  Leap year calendar (1) or not (0)
-   ln_rstart   =   .true.
-   cn_ocerst_in   = "HadGEM2-ES_H_00210528_restart"   !  suffix of ocean restart name (input)
-   cn_ocerst_out  = "restart"   !  suffix of ocean restart name (output)
+   ln_rstart   =   .false.
+   cn_ocerst_in   = "_restart"   !  suffix of ocean restart name (input)
+   cn_ocerst_out  = "exp_prj_sf_L51_r24"   !  suffix of ocean restart name (output)
    cn_ocerst_indir   = "./RESTARTS/"   !  directory of ocean restart name (input)
    cn_ocerst_outdir  = "./RESTARTS/"   !  directory of ocean restart name (output)
-   nn_istate   =     0     !  output the initial state (1) or not (0)
-   nn_stock = 99999999
-   nn_write = 99999999
+   nn_istate   =     1     !  output the initial state (1) or not (0)
+   nn_stock = 0
+   nn_write = 0
    ln_dimgnnn  = .false.   !  DIMG file format: 1 file for all processors (F) or by processor (T)
    ln_mskland  = .false.   !  mask land points in NetCDF outputs (costly: + ~15%)
    ln_clobber  = .true.    !  clobber (overwrite) an existing file
@@ -85,8 +85,6 @@
    rn_rdt      =   300    !  time step for the dynamics (and tracer if nn_acc=0)
    nn_msh      =    0      !  create (=1) a mesh file or not (=0)
    rn_hmin     =   -3.     !  min depth of the ocean (>0) or min number of ocean level (<0)
-   
-   nn_msh      =    0      !  create (=1) a mesh file or not (=0)
    ppa0        =    999999.0
    ppa1        =    999999.0
    ppa2        =    999999.0
@@ -136,9 +134,9 @@
    sn_msk  = 'inits_fake',     -1,        'mask',   .false.    , .true. , 'monthly'  ,    ''    , ''    
 !   
    cn_dir        = './'     !  root directory for the location of the runoff files
-   ln_tsd_init   = .true.  !  Initialisation of ocean T & S with T &S input data (T) or not (F)
-   ln_tsd_interp = .true.    !  Interpolation of T & S in the verticalinput data (T) or not (F)
-   ln_tsd_tradmp = .false.   !  damping of ocean T & S toward T &S input data (T) or not (F)
+   ln_tsd_init   = .false.  !  Initialisation of ocean T & S with T &S input data (T) or not (F)
+   ln_tsd_interp = .false.  !  Interpolation of T & S in the verticalinput data (T) or not (F)
+   ln_tsd_tradmp = .false.  !  damping of ocean T & S toward T &S input data (T) or not (F)
    nn_tsd_zone = 1
 
 /
@@ -147,13 +145,13 @@
 !-----------------------------------------------------------------------
    nn_fsbc     = 1         !  frequency of surface boundary condition computation
                            !     (also = the frequency of sea-ice model call)
-   ln_ana      = .true.   !  analytical formulation                    (T => fill namsbc_ana )
+   ln_ana      = .true.    !  analytical formulation                    (T => fill namsbc_ana )
    ln_flx      = .false.   !  flux formulation                          (T => fill namsbc_flx )
    ln_blk_clio = .false.   !  CLIO bulk formulation                     (T => fill namsbc_clio)
-   ln_blk_core = .false.    !  CORE bulk formulation                     (T => fill namsbc_core)
+   ln_blk_core = .false.   !  CORE bulk formulation                     (T => fill namsbc_core)
    ln_blk_mfs  = .false.   !  MFS bulk formulation                      (T => fill namsbc_mfs )
 !  ln_cpl      = .false.   !  Coupled formulation                       (T => fill namsbc_cpl )
-   ln_apr_dyn  = .true.    !  Patm gradient added in ocean & ice Eqs.   (T => fill namsbc_apr ) 
+   ln_apr_dyn  = .false.   !  Patm gradient added in ocean & ice Eqs.   (T => fill namsbc_apr ) 
    nn_ice      = 0         !  =0 no ice boundary condition   , 
                            !  =1 use observed ice-cover      ,
                            !  =2 ice-model used                         ("key_lim3" or "key_lim2)
@@ -231,7 +229,7 @@
 !              !             !  (if <0  months)  !   name    !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
    sn_kd490    =  'kd490'    ,       -1         , 'kd_490'   ,   .true.     , .true. , 'yearly'  , ''       , ''       , ''
    cn_dir      = './'      !  root directory for the location of the runoff files
-   ln_traqsr   = .true.    !  Light penetration (T) or not (F)
+   ln_traqsr   = .false.    !  Light penetration (T) or not (F)
    ln_qsr_rgb  = .false.   !  RGB (Red-Green-Blue) light penetration
    nn_chldta   =   0       !  RGB : Chl data (=1) or cst value (=0)
    rn_abs      =   0.58    !  RGB & 2 bands: fraction of light (rn_si1)
@@ -255,7 +253,7 @@
    rn_hrnf      =  1000.e0  !  depth over which enhanced vertical mixing is used
    rn_avt_rnf   =   10 !slwa 1.e-3   !  value of the additional vertical mixing coef. [m2/s]
    rn_rfact     =   1.e0    !  multiplicative factor for runoff
-   ln_rnf_depth = .true. !.false.   !  read in depth information for runoff
+   ln_rnf_depth = .false.   !  read in depth information for runoff
    ln_rnf_tem   = .false.   !  read in temperature information for runoff
    ln_rnf_sal   = .false.   !  read in salinity information for runoff
 /
@@ -268,8 +266,8 @@
 ! ! sn_apr='CUT_ERAI_INCLUDE_MSLP',3,'MSL',.true.,.false.,'daily','weights_erai_amm7_bicubic.nc','','CUT_ERAI_LSM.nc'
    sn_apr     = 'psl_HadGEM2-ES_rcp85', 24,   'psl',   .true.,  .false.,  'yearly',  'weights_bilin_HadGEM2-ES.nc','', ''
    cn_dir     = './ATM/'         !  root directory for the location of the bulk files
-   ln_ref_apr = .false.           !  ref. pressure: global mean Patm (T) or a constant (F)
-   ln_apr_obc = .true.  	  !  inverse barometer added to OBC ssh data 
+   ln_ref_apr = .false.          !  ref. pressure: global mean Patm (T) or a constant (F)
+   ln_apr_obc = .false.          !  inverse barometer added to OBC ssh data 
 /
 !-----------------------------------------------------------------------
 &namsbc_ssr    !   surface boundary condition : sea surface restoring
@@ -356,7 +354,7 @@
 !!-----------------------------------------------------------------------
 &nambdy        !  unstructured open boundaries                          ("key_bdy")
 !!-----------------------------------------------------------------------
-    nb_bdy         = 2 !2                    !  number of open boundary sets
+    nb_bdy         = 0 !2                    !  number of open boundary sets
     ln_coords_file = .true.,.true.        !  =T : read bdy coordinates from file
     cn_coords_file = 'coordinates.bdy.nc','coordinates.skagbdy.nc' !  bdy coordinates files
     ln_mask_file   = .false.              !  =T : read mask from file
@@ -530,20 +528,20 @@
 !-----------------------------------------------------------------------
 &namdyn_ldf    !   lateral diffusion on momentum
 !-----------------------------------------------------------------------
-   ln_dynldf_lap    =  .false.  !  laplacian operator
+   ln_dynldf_lap    =  .true.  !  laplacian operator
    ln_dynldf_bilap  =  .true.  !  bilaplacian operator
    !                       !  Direction of action  :
-   ln_dynldf_level  =  .true.   !  iso-level
-   ln_dynldf_hor    =  .false.  !  horizontal (geopotential)            (require "key_ldfslp" in s-coord.)
+   ln_dynldf_level  =  .false.   !  iso-level
+   ln_dynldf_hor    =  .true.  !  horizontal (geopotential)            (require "key_ldfslp" in s-coord.)
    ln_dynldf_iso    =  .false.  !  iso-neutral                          (require "key_ldfslp")
    !                       !  Coefficient
-   rn_ahm_0_lap     =  10.    !  horizontal laplacian eddy viscosity   [m2/s]
+   rn_ahm_0_lap     =  30.    !  horizontal laplacian eddy viscosity   [m2/s]
    rn_ahmb_0        =     0.    !  background eddy viscosity for ldf_iso [m2/s]
    rn_ahm_0_blp     =     0.    !  horizontal bilaplacian eddy viscosity [m4/s]
    rn_cmsmag_1      =     3.    !  constant in laplacian Smagorinsky viscosity
    rn_cmsmag_2      =     3     !  constant in bilaplacian Smagorinsky viscosity
    rn_cmsh          =     1.    !  1 or 0 , if 0 -use only shear for Smagorinsky viscosity
-   rn_ahm_m_blp     =    -1.e12 !  upper limit for bilap  abs(ahm) < min( dx^4/128rdt, rn_ahm_m_blp)
+   rn_ahm_m_blp     =    -1.e10 !  upper limit for bilap  abs(ahm) < min( dx^4/128rdt, rn_ahm_m_blp)
    rn_ahm_m_lap     =    10.    !  upper limit for lap  ahm < min(dx^2/16rdt, rn_ahm_m_lap)
    rn_ahm_0_blp     = -1.0e10,
    rn_ahm_m_blp     = -1.0e10
@@ -613,9 +611,9 @@
                            !  buffer blocking send or immediate non-blocking sends, resp.
    nn_buffer   =   0       !  size in bytes of exported buffer ('B' case), 0 no exportation
    ln_nnogather=  .false.  !  activate code to avoid mpi_allgather use at the northfold
-   jpni        =  12       !  jpni   number of processors following i (set automatically if < 1)
-   jpnj        =  16       !  jpnj   number of processors following j (set automatically if < 1)
-   jpnij       =  146      !  jpnij  number of local domains (set automatically if < 1)
+   jpni        =  10       !  jpni   number of processors following i (set automatically if < 1)
+   jpnj        =  17       !  jpnj   number of processors following j (set automatically if < 1)
+   jpnij       =  170      !  jpnij  number of local domains (set automatically if < 1)
 /
 !-----------------------------------------------------------------------
 &namctl        !   Control prints & Benchmark
