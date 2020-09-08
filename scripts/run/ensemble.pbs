@@ -1,7 +1,7 @@
 #PBS -N AMM7
 #PBS -l select=32
 #PBS -l walltime=00:20:00
-#PBS -A n01-ORCHESTRA
+#PBS -A n01-CLASS
 
 ## PBS_O_WORKDIR = directory from which the batch job is launched.
 echo "PBS_O_WORKDIR = " $PBS_O_WORKDIR
@@ -19,15 +19,17 @@ ulimit -s unlimited
 
 date
 
+
+# Copy correct namelist template into position
+
+
 for year in {2005..2005}
 do
 
 # Array pretending to be a Pythonic dictionary
-ARRAY=( "AMM7_GENH_p10_L51:51"
-        "AMM7_SF12_p10_L51:51"
-        "AMM7_SF12_p24_L51:51"
-        "AMM7_SZTH_p10_L51:51"
-        "AMM7_SZTH_p10_L75:75" )
+ARRAY=( "sf_L51_r05:51"
+        "sf_L51_r10:51"
+        "sf_L51_r24:51"   )
 
 for ens in "${ARRAY[@]}"
 do
