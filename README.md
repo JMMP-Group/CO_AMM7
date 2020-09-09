@@ -13,8 +13,18 @@ Edit the project code in  `runscript.pbs` then:
 qsub -q short runscript.pbs
 ```
 
-_to follow_: setting up the ensemble experiments
+## ENSEMBLE Runs:
 
+*as above, but after installation*:
+
+```
+cd test/nemo/cfgs/AMM7/ENSEMBLE_CONTROL
+```
+Edit the `ensemble_hpg.pbs` script to add/remove model ensemble members from the list, then:
+```
+qsub ensemble_hpg.pbs
+```
+NB. If you alter the number of ensemble members you will have to change the number of cores requested, e.g. `#PBS -l select=21` for 3 members etc.
 
 forcing data:
 
