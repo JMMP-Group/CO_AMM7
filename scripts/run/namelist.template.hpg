@@ -35,21 +35,21 @@
 !-----------------------------------------------------------------------
    nn_no       =       0   !  Assimilation cycle index
    cn_exp      =  "__EXP__"
-   nn_it000    =  __IT000__ ! 16993 !  8641 ! 1   !  first time step
-   nn_itend    =  __ITEND__ !210240 !52128 !16992 !25920   ! 288 per 24hr   !  last  time step 
-   nn_date0    =  20050101   !  date at nit_0000 (format yyyymmdd) used if ln_rstart=F or (ln_rstart=T and nn_rstctl=0 or 1)
+   nn_it000    =  __TST__ ! 16993 !  8641 ! 1   !  first time step
+   nn_itend    =  __TEN__ !210240 !52128 !16992 !25920   ! 288 per 24hr   !  last  time step 
+   nn_date0    =  __YRS__0101   !  date at nit_0000 (format yyyymmdd) used if ln_rstart=F or (ln_rstart=T and nn_rstctl=0 or 1)
    nn_time0    =       0   !  initial time of day in hhmm
    nn_leapy    =       1   !  Leap year calendar (1) or not (0)
-   ln_rstart   = .false.   !  start from rest (F) or from a restart file (T)
-      nn_euler    =    __EULER__      !  = 0 : start with forward time step if ln_rstart=T
-      nn_rstctl   =    __RSTCTL__      !  restart control ==> activated only if ln_rstart=T
+   ln_rstart   =  __RST__.   !  start from rest (F) or from a restart file (T)
+      nn_euler    =    1     !  = 0 : start with forward time step if ln_rstart=T
+      nn_rstctl   =    2     !  restart control ==> activated only if ln_rstart=T
       !                          !    = 0 nn_date0 read in namelist ; nn_it000 : read in namelist
       !                          !    = 1 nn_date0 read in namelist ; nn_it000 : check consistancy between namelist and restart
       !                          !    = 2 nn_date0 read in restart  ; nn_it000 : check consistancy between namelist and restart
-      cn_ocerst_in    = "exp_prj_2-6_domain_cfg_sf_L51_r24_00052128_restart"   !  suffix of ocean restart name (input)
-      cn_ocerst_indir = "./RESTART"         !  directory from which to read input ocean restarts
-      cn_ocerst_out   = "restart_prj_iso2500_domain_cfg_sf_L51_r10"   !  suffix of ocean restart name (output)
-      cn_ocerst_outdir = "./RESTART"        !  directory in which to write output ocean restarts
+      cn_ocerst_in    = "__RS0__"   !  suffix of ocean restart name (input)
+      cn_ocerst_indir = "./RESTARTS"         !  directory from which to read input ocean restarts
+      cn_ocerst_out   = "restart___EXP__"   !  suffix of ocean restart name (output)
+      cn_ocerst_outdir = "./RESTARTS"        !  directory in which to write output ocean restarts
    ln_iscpl    = .false.   !  cavity evolution forcing or coupling to ice sheet model
    nn_istate   =       1   !  output the initial state (1) or not (0)
    ln_rst_list = .false.   !  output restarts at list of times using nn_stocklist (T) or at set frequency with nn_stock (F)
@@ -73,7 +73,7 @@
    ln_linssh   = .false.   !  =T  linear free surface  ==>>  model level are fixed in time
    rn_isfhmin  =    1.00   !  treshold [m] to discriminate grounding ice from floating ice
    !
-   rn_rdt      =  300.     !  time step for the dynamics and tracer
+   rn_rdt      =  __RDT__     !  time step for the dynamics and tracer
    rn_atfp     =    0.1    !  asselin time filter parameter
    !
    ln_crs      = .false.   !  Logical switch for coarsening module      (T => fill namcrs)
@@ -527,7 +527,7 @@
    ln_dynspg_exp  = .false.   ! explicit free surface
    ln_dynspg_ts = .true.   ! split-explicit free surface
    ln_bt_auto   = .false.  ! Number of sub-step defined from:
-   nn_baro      = 30       ! =F : the number of sub-step in rn_rdt seconds
+   nn_baro      = __BAR__    ! =F : the number of sub-step in rn_rdt seconds
    ln_bt_fw      = .true.     ! Forward integration of barotropic Eqs.
    ln_bt_av      = .true.     ! Time filtering of barotropic variables
    nn_bt_flt     = 1          ! Time filter choice  = 0 None

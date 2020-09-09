@@ -158,8 +158,8 @@ done
 
 mkdir $CONFIG_DIR/ENSEMBLE_CONTROL
 cp $REPO_DIR/scripts/run/end_time_step $CONFIG_DIR/ENSEMBLE_CONTROL 
-cp $REPO_DIR/scripts/run/ensemble.pbs $CONFIG_DIR/ENSEMBLE_CONTROL
-cp $REPO_DIR/scripts/run/namelist.template $CONFIG_DIR/ENSEMBLE_CONTROL
+cp $REPO_DIR/scripts/run/ensemble_hpg.pbs $CONFIG_DIR/ENSEMBLE_CONTROL
+cp $REPO_DIR/scripts/run/namelist.hpg.template $CONFIG_DIR/ENSEMBLE_CONTROL
 cp $REPO_DIR/EXP00/iodef.xml $CONFIG_DIR/ENSEMBLE_CONTROL
 cp $REPO_DIR/EXP00/file_def_nemo-oce.xml $CONFIG_DIR/ENSEMBLE_CONTROL
 cp $REPO_DIR/EXP00/context_nemo.xml $CONFIG_DIR/ENSEMBLE_CONTROL
