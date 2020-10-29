@@ -604,6 +604,9 @@
 !-----------------------------------------------------------------------
    ln_hpg_prj  = .true.   !  s-coordinate (Pressure Jacobian scheme)
    ln_hpg_sco  = .false. ! 
+   ln_hpg_djc  = .false.
+   ln_hpg_djc_vN_hor = .false.  
+   ln_hpg_djc_vN_vrt = .false. 
 /
 !-----------------------------------------------------------------------
 &namdyn_spg    !   surface pressure gradient                            (default: NO selection)
