@@ -149,7 +149,7 @@ for i in  $(seq 1 $n); do
   ln -s ../../ENSEMBLE_INPUTS/chlorophyll.nc chlorophyll.nc
   ln -s ../../ENSEMBLE_INPUTS/BDY_SKAG BDY_SKAG
   ln -s ../../ENSEMBLE_INPUTS/BDY BDY
-  ln -s ../../ENSEMBLE_INPUTS/ATM ATM
+  ln -s ../../ENSEMBLE_INPUTS/SBC SBC
   ln -s ../../ENSEMBLE_INPUTS/IC/initcd_y2005m01.nc initcd_y2005m01.nc
   mkdir meta_out
   mkdir RESTARTS
@@ -171,7 +171,7 @@ mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/IC
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/BDY
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/BDY_SKAG
 mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/DOM
-mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/ATM
+mkdir $CONFIG_DIR/ENSEMBLE_INPUTS/SBC
 
 n=`cat $REPO_DIR/scripts/setup/model_list | wc -l`
 for i in  $(seq 1 $n); do
