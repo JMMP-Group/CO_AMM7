@@ -180,16 +180,17 @@ CONTAINS
          END DO
     ! END DO
       ELSE  ! Use an analytic function
-         DO jj = 1, jpj
-            DO ji = 1, jpi
-               pts(ji,jj,:,jp_sal) = rn_sal_sf
-               pts(ji,jj,:,jp_tem) = rn_c0_sf * ( 1-tanh( ( (pdept(ji,jj,:)-rn_mld_sf)/20 )*3.1415927/180 ) ) &
-                                   + rn_c1_sf * ( ( rn_maxdep_sf - pdept(ji,jj,:) ) / rn_maxdep_sf ) 
+         DO jk = 1, jpk  
+            DO jj = 1, jpj
+               DO ji = 1, jpi
+                  pts(ji,jj,jk,jp_sal) = rn_sal_sf * ptmask(ji,jj,jk)
+                  pts(ji,jj,jk,jp_tem) = ( rn_c0_sf * ( 1-tanh( ( (pdept(ji,jj,jk)-rn_mld_sf)/20 )*3.1415927/180 ) ) &
+                        &              + rn_c1_sf * ( ( rn_maxdep_sf - pdept(ji,jj,jk) ) / rn_maxdep_sf ) ) * ptmask(ji,jj,jk) 
                !pts(ji,jj,:,jp_tem) = ( a0 * exp( -a1 * pdept(ji,jj,:) ) + a2 ) * ptmask(ji,jj,:)
                !pts(ji,jj,:,jp_sal) = ( b0 * exp( -b1 * pdept(ji,jj,:) ) + b2 ) * ptmask(ji,jj,:) 
+               END DO
             END DO
          END DO
-
       END IF
 
    END SUBROUTINE usr_def_istate
