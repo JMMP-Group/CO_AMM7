@@ -48,7 +48,7 @@
       !                          !    = 2 nn_date0 read in restart  ; nn_it000 : check consistancy between namelist and restart
       cn_ocerst_in    = "__RS0__"   !  suffix of ocean restart name (input)
       cn_ocerst_indir = "./RESTARTS"         !  directory from which to read input ocean restarts
-      cn_ocerst_out   = "restart___EXP__"   !  suffix of ocean restart name (output)
+      cn_ocerst_out   = "restart"   !  suffix of ocean restart name (output)
       cn_ocerst_outdir = "./RESTARTS"        !  directory in which to write output ocean restarts
    ln_iscpl    = .false.   !  cavity evolution forcing or coupling to ice sheet model
    nn_istate   =       1   !  output the initial state (1) or not (0)
@@ -64,8 +64,8 @@
    ln_cfmeta   = .false.   !  output additional data to netCDF files required for compliance with the CF metadata standard
    ln_clobber  = .true.    !  clobber (overwrite) an existing file
    nn_chunksz  =       0   !  chunksize (bytes) for NetCDF file (works only with iom_nf90 routines)
-   ln_xios_read = .FALSE.  !  use XIOS to read restart file (only for a single file restart)
-   nn_wxios = 0      !  use XIOS to write restart file 0 - no, 1 - single file output, 2 - multiple file output
+   ln_xios_read = .TRUE.  !  use XIOS to read restart file (only for a single file restart)
+   nn_wxios = 1      !  use XIOS to write restart file 0 - no, 1 - single file output, 2 - multiple file output
 /
 !-----------------------------------------------------------------------
 &namdom        !   time and space domain
@@ -118,7 +118,7 @@
    nn_tsd_zone = 2  ! Set this to 5 and use the below parameters to create the temp profile used in SF12
    rn_sal_sf = 35.5 
    rn_mld_sf = 120
-   rn_maxdep_sf = 5800
+   rn_maxdep_sf = 5500
    rn_c0_sf = 3
    rn_c1_sf = 6
 /
@@ -464,13 +464,14 @@
 !-----------------------------------------------------------------------
 &nameos        !   ocean Equation Of Seawater                           (default: NO selection)
 !-----------------------------------------------------------------------
- !  ln_teos10   = .true.         !  = Use TEOS-10 equation of state
-   ln_eos80 = .true.
-   rn_lambda2=5.4914e-4 
+   ln_teos10   = .false.         !  = Use TEOS-10 equation of state
+   ln_eos80    = .true.
+!   rn_lambda2  = 5.4914e-4 
 /
 !-----------------------------------------------------------------------
 &namtra_adv    !   advection scheme for tracer                          (default: NO selection)
 !-----------------------------------------------------------------------
+   ln_traadv_OFF = .false.
    ln_traadv_fct = .true. !  FCT scheme
       nn_fct_h   =  4            !  =2/4, horizontal 2nd / 4th order
       nn_fct_v   =  2            !  =2/4, vertical   2nd / COMPACT 4th order
@@ -478,12 +479,13 @@
 !-----------------------------------------------------------------------
 &namtra_ldf    !   lateral diffusion scheme for tracers                 (default: NO selection)
 !-----------------------------------------------------------------------
-   ln_traldf_lap   =  .false.   ! T   laplacian operator
-   ln_traldf_hor   =  .false.   ! T   horizontal (geopotential)
-   ln_traldf_OFF   =  .true. ! *AW*
-
+   ln_traldf_OFF   =  .true. !.false.
+   ln_traldf_lap   =  .false. !.true.   ! T   laplacian operator
+   ln_traldf_hor   =  .false. !.true.   ! T   horizontal (geopotential)
+   ln_traldf_iso   =  .false.    ! T   iso_neutral
+   ln_traldf_lev   =  .false.    ! T   along model surfaces
    !                       !  Coefficients:
-   nn_aht_ijk_t    = 31         !  =  0   constant = 1/2  Ud*Ld   (lap case) 
+   nn_aht_ijk_t    = 0         !  =  0   constant = 1/2  Ud*Ld   (lap case) 
       rn_Ud        = 0.01           !  lateral diffusive velocity [m/s] (nn_aht_ijk_t= 0, 10, 20, 30)
       rn_Ld        = 10.e+3         !  lateral diffusive length   [m]   (nn_aht_ijk_t= 0, 10)
 /
@@ -506,8 +508,9 @@
 !-----------------------------------------------------------------------
 &namdyn_adv    !   formulation of the momentum advection                (default: NO selection)
 !-----------------------------------------------------------------------
+   ln_dynadv_OFF = .false.
    ln_dynadv_vec = .true.  !  vector form - 2nd centered scheme
-     nn_dynkeg     = 0        ! grad(KE) scheme: =0   C2  ;  =1   Hollingsworth correction
+     nn_dynkeg   = 0       ! grad(KE) scheme: =0   C2  ;  =1   Hollingsworth correction
 /
 !-----------------------------------------------------------------------
 &namdyn_vor    !   Vorticity / Coriolis scheme                          (default: NO selection)
@@ -538,6 +541,7 @@
 !-----------------------------------------------------------------------
 &namdyn_ldf    !   lateral diffusion on momentum                        (default: NO selection)
 !-----------------------------------------------------------------------
+   ln_dynldf_OFF = .false.
    ln_dynldf_blp = .true.     !  bilaplacian operator
    ln_dynldf_lap = .false. 
    ln_dynldf_lev = .true.     !  iso-level
@@ -564,12 +568,13 @@
 !-----------------------------------------------------------------------
 &namzdf        !   vertical physics                                     (default: NO selection)
 !-----------------------------------------------------------------------
-   ln_zdfgls   =  .true.       !  Generic Length Scale closure              (T =>   fill namzdf_gls)                   ! coefficients
+   ln_zdfcst   = .false.
+   ln_zdfgls   = .true.       !  Generic Length Scale closure              (T =>   fill namzdf_gls)                   ! coefficients
  
-   ln_zdfevd=.false.
-   nn_evdm=1
+   ln_zdfevd   = .false.
+   nn_evdm     =   1
    rn_avm0     =   0.1e-6     !  vertical eddy viscosity   [m2/s]       (background Kz if ln_zdfcst=F)
-   rn_avt0     =   0 ! 0.1e-6     !  vertical eddy diffusivity [m2/s]       (background Kz if ln_zdfcst=F)
+   rn_avt0     =   0 !1.2e-5     !  vertical eddy diffusivity [m2/s]       (background Kz if ln_zdfcst=F)
    nn_avb      =    0         !  profile for background avt & avm (=1) or not (=0)
    nn_havtb    =    0         !  horizontal shape for avtb (=1) or not (=0)
 /
@@ -617,19 +622,19 @@
    ln_vor_trd  = .false.   ! (T) 2D barotropic vorticity trends (not coded yet)
    ln_KE_trd   = .false.   ! (T) 3D Kinetic   Energy     trends
    ln_PE_trd   = .false.   ! (T) 3D Potential Energy     trends
-   ln_tra_trd  = .false.   ! (T) 3D tracer trend output
+   ln_tra_trd  = .true.   ! (T) 3D tracer trend output
    ln_tra_mxl  = .false.   ! (T) 2D tracer trends averaged over the mixed layer (not coded yet)
    nn_trd      = 365       !  print frequency (ln_glo_trd=T) (unit=time step)
 /
 !-----------------------------------------------------------------------
 &nam_diatmb    !  Top Middle Bottom Output                              (default F)
 !-----------------------------------------------------------------------
-   ln_diatmb  = .true.    !  Choose Top Middle and Bottom output or not
+   ln_diatmb  = .false.    !  Choose Top Middle and Bottom output or not
 /
 !-----------------------------------------------------------------------
 &nam_dia25h    !  25h Mean Output                                       (default F)
 !-----------------------------------------------------------------------
-   ln_dia25h  = .true.    ! Choose 25h mean output or not
+   ln_dia25h  = .false.    ! Choose 25h mean output or not
 /
 !!======================================================================
 !!               ***  Observation & Assimilation  ***                 !!
@@ -652,8 +657,8 @@
    ln_listonly =  .false.  !  do nothing else than listing the best domain decompositions (with land domains suppression)
    !                       !  if T: the largest number of cores tested is defined by max(mppsize, jpni*jpnj)
    ln_nnogather =  .true.  !  activate code to avoid mpi_allgather use at the northfold
-   jpni        = 10 !11      !  jpni   number of processors following i (set automatically if < 1)
-   jpnj        = 17      !  jpnj   number of processors following j (set automatically if < 1)
+   jpni        = 11      !  jpni   number of processors following i (set automatically if < 1)
+   jpnj        = 11      !  jpnj   number of processors following j (set automatically if < 1)
 /
 !-----------------------------------------------------------------------
 &namctl        !   Control prints                                       (default: OFF)
@@ -669,7 +674,7 @@
        sn_cfctl%procmin   = 0       ! Minimum area number for reporting [default:0]
        sn_cfctl%procmax   = 1000000 ! Maximum area number for reporting [default:1000000]
        sn_cfctl%procincr  = 1       ! Increment for optional subsetting of areas [default:1]
-       sn_cfctl%ptimincr  = 24       ! Timestep increment for writing time step progress info
+       sn_cfctl%ptimincr  = 1        ! Timestep increment for writing time step progress info
    nn_print    =    0      !  level of print (0 no extra print)
    nn_ictls    =    0      !  start i indice of control sum (use to compare mono versus
    nn_ictle    =    0      !  end   i indice of control sum        multi processor runs
