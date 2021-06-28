@@ -1,6 +1,7 @@
-## CO AMM7 (Coastal Ocean Atlantic Margin Model 7km)
+## CO AMM7 (Coastal Ocean Atlantic Margin Model 7km) 
+[![DOI](https://zenodo.org/badge/235544712.svg)](https://zenodo.org/badge/latestdoi/235544712)
 
-CO AMM7 configuration, currently set up for testing various vertical coordinate options
+_CO AMM7 configuration, currently set up for testing various vertical coordinate options_
 
 ## Quick Start:
 
