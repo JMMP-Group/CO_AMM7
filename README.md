@@ -1,4 +1,5 @@
-# CO_AMM7
+## CO AMM7 (Coastal Ocean Atlantic Margin Model 7km)
+
 CO AMM7 configuration, currently set up for testing various vertical coordinate options
 
 ## Quick Start:
