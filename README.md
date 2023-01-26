@@ -78,3 +78,6 @@ Input files can then be downloaded into the experiment directory  and the config
 | **Initial condition** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/IC/ |
 
 ---
+
+
+### Migration to NEMO v4.2
