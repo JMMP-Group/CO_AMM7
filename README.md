@@ -60,9 +60,9 @@ Input files can then be downloaded into the experiment directory  and the config
 
 |  **Input** | **Download Location** |
 |-------------- | -------------- |
-| **Domain_cfg.nc** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc |
-| **Open ocean boundary coordinates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/grid/coordinates.bdy.nc |
-| **Baltic coordimates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/grid/coordinates.skagbdy.nc |
+| **Domain_cfg.nc** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc |
+| **Open ocean boundary coordinates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/grid/coordinates.bdy.nc |
+| **Baltic coordimates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/grid/coordinates.skagbdy.nc |
 
 ---
 
@@ -70,11 +70,11 @@ Input files can then be downloaded into the experiment directory  and the config
 
 | **Forcing** | **Download Location** |
 |-------------- | ------------------|
-| **Surface boundary** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/SBC/ |
-| **Open ocean boundary** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/BDY/ |
-| **Baltic boundary** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/BDY_SKAG/ |
-| **River runoff** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/RIV/ |
-| **Tide** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/TIDE/ |
-| **Initial condition** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/IC/ |
+| **Surface boundary** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/SBC/ |
+| **Open ocean boundary** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/BDY/ |
+| **Baltic boundary** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/BDY_SKAG/ |
+| **River runoff** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/RIV/ |
+| **Tide** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/TIDE/ |
+| **Initial condition** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/IC/ |
 
 ---
