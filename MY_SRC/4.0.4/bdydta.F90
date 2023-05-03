@@ -367,9 +367,8 @@ CONTAINS
       ! NB - add a shift to the boundary + free elevation Enda, JT from NEMO RAN 3.6
       DO jbdy = 1, nb_bdy
          IF( dta_bdy(jbdy)%lneed_ssh ) THEN
-             nblen => idx_bdy(jbdy)%nblenrim
              igrd  = 1
-             DO ib = 1, nblen(igrd)
+             DO ib = 1, idx_bdy(jbdy)%nblenrim(igrd)
                 ii = idx_bdy(jbdy)%nbi(ib,igrd)
                 ij = idx_bdy(jbdy)%nbj(ib,igrd)
                 dta_bdy(jbdy)%ssh(ib) = dta_bdy(jbdy)%ssh(ib) + rn_ssh_shift(jbdy) * tmask(ii,ij,1)
