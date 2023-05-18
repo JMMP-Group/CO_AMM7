@@ -219,11 +219,14 @@ esac
 
 # Issues with the Cray compiler require the addition of ',' to the namelist
 # this change shouldn't affect other compilers
-sed -i 's/= *.true./= .true.\,/g'   $1
-sed -i 's/= *.false./= .false.\,/g' $1
-sed -i 's/= *.FALSE./= .FALSE.\,/g' $1
-sed -i 's/= *.TRUE./= .TRUE.\,/g'   $1
-sed -i 's/.,,/.,/g'   $1
+for nml in namelist*
+do
+  sed -i 's/= *.true./= .true.\,/g'   $nml
+  sed -i 's/= *.false./= .false.\,/g' $nml
+  sed -i 's/= *.FALSE./= .FALSE.\,/g' $nml
+  sed -i 's/= *.TRUE./= .TRUE.\,/g'   $nml
+  sed -i 's/.,,/.,/g'   $nml
+done
 
 mkdir meta_out
 mkdir RESTARTS
