@@ -1,24 +1,31 @@
 #!/bin/bash
-# Lightweight script to set up AMM7 on ARCHER2 
- 
+# Lightweight script to set up NEMO and XIOS
+set -e
+
 display_usage() { 
    echo
-   echo "  Auto-Config: AMM7 on ARCHER2"
+   echo "  Auto-Config: NEMO and XIOS"
    echo "  ***************************************"
    echo
-   echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
-   echo "                  -m machine -v version -c compiler -a mpi_build"
+   echo "  usage: ${0##*/} -p path_to_install -r path_to_repo -n nemo_version"
+   echo "                  -x xios_version -m machine -c compiler -a mpi_build"
    echo
-   echo "  flags:  -w full path to where nemo will be installed"
-   echo "          -x full path to where xios will be installed"
-   echo "          -s full path to where SE-NEMO repository resides"
-   echo "          -v NEMO vserion"
+   echo "  flags:  -p full path to where nemo/xios will be installed"
+   echo "          -r full path to where this reposiotry resides"
+   echo "          -n NEMO version"
+   echo "          -x XIOS version"
    echo "          -m machine name"
    echo "          -c compiler"
    echo "          -a MPI build [mpich|mpich4|ompi]"
    echo
    exit 1
 	} 
+# check whether user had supplied -h or --help . If yes display usage 
+	if [[ ( $# == "--help") ||  $# == "-h" ]] 
+	then 
+		display_usage
+		exit 0
+	fi 
 # if less than three arguments supplied, display usage 
 	if [  $# -le 13 ] 
 	then 
@@ -31,34 +38,25 @@ display_usage() {
 		display_usage
 		exit 1
 	fi 
-# check whether user had supplied -h or --help . If yes display usage 
-	if [[ ( $# == "--help") ||  $# == "-h" ]] 
-	then 
-		display_usage
-		exit 0
-	fi 
 
-while getopts w:x:s:m:v:c:a: option
+while getopts p:r:m:n:x:c:a: option
   do
   case "${option}"
   in
-  w) export WORK_DIR=${OPTARG};;
-  x) export XIOS_DIR=${OPTARG};;
-  s) export REPO_DIR=${OPTARG};;
+  p) export WORK_DIR=${OPTARG};;
+  r) export REPO_DIR=${OPTARG};;
   m) export HPC_TARG=${OPTARG};;
-  v) export NEMO_VER=${OPTARG};;
+  n) export NEMO_VER=${OPTARG};;
+  x) export XIOS_VER=${OPTARG};;
   c) export COMPILER=${OPTARG};;
   a) export MPI_TARG=${OPTARG};;
+  :) printf "missing argument for -%s\n" "$OPTARG" >&2; display_usage; exit 1;;
+ \?) printf "illegal option: -%s\n" "$OPTARG" >&2; display_usage; exit 1;;
   esac
 done
 
 if [ ${WORK_DIR:0:1} != "/" ]; then
   echo "WORK_DIR must use full path"
-  exit 1
-fi
-
-if [ ${XIOS_DIR:0:1} != "/" ]; then
-  echo "XIOS_DIR must use full path"
   exit 1
 fi
 
@@ -77,7 +75,14 @@ echo "Making sure that the correct modules are loaded"
 
 case "${HPC_TARG}"
   in
-  archer2) . $REPO_DIR/scripts/env/${HPC_TARG}-${COMPILER}-${MPI_TARG}
+  archer2) case "${COMPILER}-${MPI_TARG}"
+             in
+             cray-mpich|gnu-mpich)   
+	                           . $REPO_DIR/scripts/env/${HPC_TARG}-${COMPILER}-${MPI_TARG}
+				   ;;
+	     *) echo "Compiler/MPI combination not available"
+		exit 1
+	   esac
            ;;
   *)       echo "Machine not recognised"
            echo "Machines available: archer2"
@@ -88,14 +93,11 @@ export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
 
 case "${NEMO_VER}"
   in
-  4.0.2)   echo "NEMO Version 4.0.2 will be checked out"
-           ;;
-  4.2.0)   echo "NEMO Version 4.2.0 will be checked out"
-           ;;
-  4.2)     echo "NEMO Head of branch 4.2  will be checked out"
-           ;;
+  4.0.2|4.0.4|4.2|4.2.0|4.2.1)   
+           echo "NEMO Version $NEMO_VER will be checked out"
+	   ;;
   *)       echo "NEMO Version not recognised"
-           echo "Versions available: 4.0.2, 4.2.0, branch 4.2"
+           echo "Versions available: 4.0.2, 4.0.4, 4.2.0, 4.2.1, branch 4.2"
            exit 1
 esac
 
@@ -103,77 +105,83 @@ esac
 echo "Checking out NEMO repository"
 case "${NEMO_VER}"
   in
-  4.2)     git clone --branch branch_4.2 https://forge.nemo-ocean.eu/nemo/nemo.git nemo
+  4.2)            
+           git clone --filter=blob:none --no-checkout --depth 1 --sparse --branch branch_4.2 https://forge.nemo-ocean.eu/nemo/nemo.git nemo
+           cd nemo
+           git sparse-checkout add /makenemo /mk /src /cfgs/SHARED /cfgs/ref_cfgs.txt /ext
            ;;
-  4.2.0)   git clone --branch 4.2.0 https://forge.nemo-ocean.eu/nemo/nemo.git nemo
+  4.2.0|4.2.1)   
+           git clone --filter=blob:none --no-checkout --depth 1 --sparse --branch $NEMO_VER https://forge.nemo-ocean.eu/nemo/nemo.git nemo
+           cd nemo
+           git sparse-checkout add /makenemo /mk /src /cfgs/SHARED /cfgs/ref_cfgs.txt /ext
            ;;
-  *)       svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER --depth empty nemo
+  *)       
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER --depth empty nemo
            svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/src --depth infinity nemo/src
            svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/SHARED nemo/cfgs/SHARED
            svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
+           cd nemo
            ;;
 esac
 
-cd nemo
 
 # Now check EXTERNALS revision number before checking out the rest
 case "${NEMO_VER}"
   in
-  4.2)     echo "Nothing to do as EXTERNALS are integral to 4.2"
-           ;;
-  4.0.2)     echo "Nothing to do as EXTERNALS are integral to 4.2.0"
-           ;;
-  *)       for ext_name in mk FCM IOIPSL
-             do
-             ext=`svn propget svn:externals | grep $ext_name | cut -c2-`
-             svn co http://forge.ipsl.jussieu.fr/nemo/svn/$ext
-           done
-           ext=`svn propget svn:externals | grep makenemo | cut -c2-`
-           svn export http://forge.ipsl.jussieu.fr/nemo/svn/$ext
-           ;;
+  4.2|4.2.0|4.2.1)     
+      echo "Nothing to do as EXTERNALS are integral to $NEMO_VER"
+      ;;
+  *)  
+      for ext_name in mk FCM IOIPSL
+        do
+        ext=`svn propget svn:externals | grep $ext_name | cut -c2-`
+        svn co http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+      done
+      ext=`svn propget svn:externals | grep makenemo | cut -c2-`
+      svn export http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+      ;;
 esac
-
-mkdir arch
 
 # Setup the directory structure 
 mkdir $WORK_DIR/nemo/cfgs/AMM7
-
+cd $WORK_DIR
+echo 'here'
 # Define the location of where the forcing files are to be downloaded 
 export DOWNLOAD_DIR="$WORK_DIR/nemo/cfgs/AMM7/EXPREF/"
 
-echo $XIOS_DIR
-# Choose an appropriate directory for your XIOS installation
-if [ ! -d "$XIOS_DIR" ]; then
-  mkdir $XIOS_DIR
-fi
-
-# Checkout the XIOS code from the SVN repository
-cd $XIOS_DIR
-
 echo "Checking out xios repository"
 
+#XIOS3/branches/xios-3.0-beta
 case "${NEMO_VER}"
   in
   4.2)     svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk@2379 xios
+           cd xios
+           cp $REPO_DIR/arch/xios/2/* ./arch
+           ;;
+  4.2.0)   svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk@2379 xios
+           cd xios
+           cp $REPO_DIR/arch/xios/2/* ./arch
+           ;;
+  4.2.1)   svn checkout  http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk@2379 xios
+           cd xios
+           cp $REPO_DIR/arch/xios/2/* ./arch
            ;;
   *)       svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           cd xios
+           cp $REPO_DIR/arch/xios/2.5/* ./arch
            ;;
 esac
-
-
-cd xios
-cp $REPO_DIR/arch/xios/* ./arch
 
 echo "Compiling xios"
 ./make_xios --full --prod --arch ${HPC_TARG}-${COMPILER}-${MPI_TARG} --netcdf_lib netcdf4_par --job 10
 
 # Let's update the path to xios
-export XIOS_DIR=$XIOS_DIR/xios
+export XIOS_DIR=$WORK_DIR/xios
 
 [ -f $XIOS_DIR/bin/xios_server.exe ] || exit 1
 
 cd $WORK_DIR/nemo
-cp $REPO_DIR/arch/nemo/* ./arch
+cp -r $REPO_DIR/arch/nemo/$NEMO_VER arch
 # Dirty fix to hard wire path otherwise user will have to set XIOS_DIR in every new shell session
 sed -i "s?XXX_XIOS_DIR_XXX?$XIOS_DIR?" ./arch/arch-${HPC_TARG}-${COMPILER}-${MPI_TARG}.fcm
 
@@ -208,6 +216,14 @@ case "${HPC_TARG}"
            sed -i "s?XXX_ENV_XXX??" runscript.mpirun 
            ;;
 esac
+
+# Issues with the Cray compiler require the addition of ',' to the namelist
+# this change shouldn't affect other compilers
+sed -i 's/= *.true./= .true.\,/g'   $1
+sed -i 's/= *.false./= .false.\,/g' $1
+sed -i 's/= *.FALSE./= .FALSE.\,/g' $1
+sed -i 's/= *.TRUE./= .TRUE.\,/g'   $1
+sed -i 's/.,,/.,/g'   $1
 
 mkdir meta_out
 mkdir RESTARTS
