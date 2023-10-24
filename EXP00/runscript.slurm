@@ -1,30 +1,42 @@
 #!/bin/bash
-#SBATCH --job-name=co9_test
-#SBATCH --time=00:15:00
-#SBATCH --account=n01
+#SBATCH --job-name=ISSI
+#SBATCH --time=20:00:00
+#SBATCH --nodes=2
+#SBATCH --ntasks=100
+#SBATCH --account=n01-class
 #SBATCH --partition=standard
 #SBATCH --qos=standard
+#SBATCH -o %A_%a.out
+#SBATCH -e %A_%a.err
 
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-core=1
-
-module swap craype-network-ofi craype-network-ucx #depend on xios version
-module swap cray-mpich cray-mpich-ucx #depend on xios version
+# Created by: mkslurm -S 4 -s 16 -m 2 -C  96 -c  2 -t 00:10:00 -a n01 -j nemo_test
+start=`date +%s`
+export OMP_NUM_THREADS=1
+module swap craype-network-ofi craype-network-ucx
+module swap cray-mpich cray-mpich-ucx
 module load cray-hdf5-parallel/1.12.0.7
 module load cray-netcdf-hdf5parallel/4.7.4.7
-export OMP_NUM_THREADS=1
 
-cat > myscript_wrapper.sh << EOFB
+#
+cat > myscript_wrapper2.sh << EOFB
 #!/bin/ksh
 #
 set -A map ./xios_server.exe ./nemo
 exec_map=( 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 )
 #
-exec \${map[\${exec_map[\$SLURM_PROCID]}]}
+exec \${map[\${exec_map[\$SLURM_PROCID]}]} 
 ##
 EOFB
-chmod u+x ./myscript_wrapper.sh
+chmod u+x ./myscript_wrapper2.sh
+#
+srun --mem-bind=local --cpu-bind=v,map_cpu:00,0x10,0x20,0x22,0x24,0x26,0x28,0x2a,0x2c,0x2e,0x30,0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e,0x40,0x42,0x44,0x46,0x48,0x4a,0x4c,0x4e,0x50,0x52,0x54,0x56,0x58,0x5a,0x5c,0x5e,0x60,0x62,0x64,0x66,0x68,0x6a,0x6c,0x6e,0x70,0x72,0x74,0x76,0x78,0x7a,0x7c,0x7e,00,0x10,0x20,0x22,0x24,0x26,0x28,0x2a,0x2c,0x2e,0x30,0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e,0x40,0x42,0x44,0x46,0x48,0x4a,0x4c,0x4e,0x50,0x52,0x54,0x56,0x58,0x5a,0x5c,0x5e,0x60,0x62,0x64,0x66,0x68,0x6a,0x6c,0x6e,0x70,0x72,0x74,0x76,0x78,0x7a,0x7c,0x7e, ./myscript_wrapper2.sh
 
-srun --mem-bind=local \
---ntasks=100 --ntasks-per-node=50 --cpu-bind=v,mask_cpu:0x1,0x10000,0x100000000,0x400000000,0x1000000000,0x4000000000,0x10000000000,0x40000000000,0x100000000000,0x400000000000,0x1000000000000,0x4000000000000,0x10000000000000,0x40000000000000,0x100000000000000,0x400000000000000,0x1000000000000000,0x4000000000000000,0x10000000000000000,0x40000000000000000,0x100000000000000000,0x400000000000000000,0x1000000000000000000,0x4000000000000000000,0x10000000000000000000,0x40000000000000000000,0x100000000000000000000,0x400000000000000000000,0x1000000000000000000000,0x4000000000000000000000,0x10000000000000000000000,0x40000000000000000000000,0x100000000000000000000000,0x400000000000000000000000,0x1000000000000000000000000,0x4000000000000000000000000,0x10000000000000000000000000,0x40000000000000000000000000,0x100000000000000000000000000,0x400000000000000000000000000,0x1000000000000000000000000000,0x4000000000000000000000000000,0x10000000000000000000000000000,0x40000000000000000000000000000,0x100000000000000000000000000000,0x400000000000000000000000000000,0x1000000000000000000000000000000,0x4000000000000000000000000000000,0x10000000000000000000000000000000,0x40000000000000000000000000000000 ./myscript_wrapper.sh
+end=`date +%s`
+runtime=$((end-start))
+hours=$((runtime / 3600))
+minutes=$(( (runtime % 3600) / 60 ))
+seconds=$(( (runtime % 3600) % 60 ))
+echo "Runtime: $hours:$minutes:$seconds (hh:mm:ss)"
+wait
+exit
 

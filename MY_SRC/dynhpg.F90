@@ -75,7 +75,7 @@ MODULE dynhpg
 #  include "vectopt_loop_substitute.h90"
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
-   !! $Id: dynhpg.F90 11536 2019-09-11 13:54:18Z smasson $
+   !! $Id$
    !! Software governed by the CeCILL license (see ./LICENSE)
    !!----------------------------------------------------------------------
 CONTAINS
@@ -114,7 +114,10 @@ CONTAINS
       IF( l_trddyn ) THEN      ! save the hydrostatic pressure gradient trends for momentum trend diagnostics
          ztrdu(:,:,:) = ua(:,:,:) - ztrdu(:,:,:)
          ztrdv(:,:,:) = va(:,:,:) - ztrdv(:,:,:)
-         CALL trd_dyn( ztrdu, ztrdv, jpdyn_hpg, kt )
+!AW_DS
+!         CALL trd_dyn( ztrdu, ztrdv, jpdyn_hpg, kt )
+         CALL trd_dyn( ztrdu, ztrdv, jpdyn_hpg_save, kt )
+!AW_DS_end
          DEALLOCATE( ztrdu , ztrdv )
       ENDIF
       !

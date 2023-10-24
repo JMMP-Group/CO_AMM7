@@ -180,6 +180,7 @@ CONTAINS
           zmskv = 0.5*( 2._wp - vmask(ji,jj-1,mbkt(ji,jj)) * vmask(ji,jj,mbkt(ji,jj)) )     ! (CAUTION: CdU<0)
           ustar2_bot(ji,jj) = - rCdU_bot(ji,jj) * SQRT(  ( zmsku*( ub(ji,jj,mbkt(ji,jj))+ub(ji-1,jj,mbkt(ji,jj)) ) )**2  &
              &                                         + ( zmskv*( vb(ji,jj,mbkt(ji,jj))+vb(ji,jj-1,mbkt(ji,jj)) ) )**2  )
+     
          END DO
       END DO
       IF( ln_isfcav ) THEN       !top friction
