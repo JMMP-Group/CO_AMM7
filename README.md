@@ -6,6 +6,7 @@ Model configurations are underpinned by the Nucleus for European Modelling of th
 
 The key update in this version of the AMM7 configuration is the change to a multi-envelope vertical coordinate system (from a quasi-sigma terrain following system). Details of this vertical coordinate system change can be found in the Ocean Modelling article [The effect of vertical coordinates on the accuracy of a shelf sea model](https://doi.org/10.1016/j.ocemod.2021.101935) and accompanying [repository](https://zenodo.org/badge/latestdoi/235544712). 
 
+This branch relates to sea level sensitivity experiements conducted using CO9_AMM7 and discussed in a paper submited to JGR:Oceans by Anthony Wise et. al.
 ---
 
 ## Configuration
@@ -33,7 +34,7 @@ The key update in this version of the AMM7 configuration is the change to a mult
 
 To clone the git repository locally
 ```
-git clone git@github.com:JMMP-Group/CO9_AMM7.git
+git clone git@github.com:JMMP-Group/CO9_AMM7_sea_level_sensitivity.git
 ```
 
 To then download NEMO and copy files from the git repo into the appropriate directories 
