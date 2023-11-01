@@ -34,10 +34,10 @@
 &namrun        !   parameters of the run
 !-----------------------------------------------------------------------
    nn_no       =  0          !  Assimilation cycle index
-   cn_exp      =  "co9_amm7" !  experiment name
+   cn_exp      =  "co_amm7" !  experiment name
    nn_it000    =  1          !  first time step
-   nn_itend    =  288        !  last time step (288 per 24hr) 
-   nn_date0    =  20150101   !  date at nit_0000 (format yyyymmdd) used if ln_rstart=F or (ln_rstart=T and nn_rstctl=0 or 1)
+   nn_itend    =  1440        !  last time step (288 per 24hr) 
+   nn_date0    =  20050101   !  date at nit_0000 (format yyyymmdd) used if ln_rstart=F or (ln_rstart=T and nn_rstctl=0 or 1)
    nn_time0    =  0          !  initial time of day in hhmm
    nn_leapy    =  1          !  Leap year calendar (1) or not (0)
    ln_rstart   =  .false.    !  start from rest (F) or from a restart file (T)
@@ -51,7 +51,7 @@
       cn_ocerst_out    = "restart"            !  suffix of ocean restart name (output)
       cn_ocerst_outdir = "./RESTARTS"         !  directory in which to write output ocean restarts
    ln_iscpl    = .false.  !  cavity evolution forcing or coupling to ice sheet model
-   nn_istate   = 1        !  output the initial state (1) or not (0)
+   nn_istate   = 0        !  output the initial state (1) or not (0)
    ln_rst_list = .false.  !  output restarts at list of times using nn_stocklist (T) or at set frequency with nn_stock (F)
    nn_stock    = 0        !  used only if ln_rst_list = F: output restart freqeuncy (modulo referenced to 1)
       !                          !    =  0 force to write restart files only at the end of the run
@@ -85,7 +85,7 @@
 !-----------------------------------------------------------------------
    ln_read_cfg = .true.   !  (=T) read the domain configuration file
       !                   !  (=F) user defined configuration           (F => create/check namusr_def)
-      cn_domcfg = "./domain_cfg_co9amm7_MEsL51r10-07.nc"   ! domain configuration filename
+      cn_domcfg = "./INPUTS/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc"   ! domain configuration filename
       !
       ln_closea = .false.    !  T => keep closed seas (defined by closea_mask field) in the  
       !                      !       domain and apply special treatment of freshwater fluxes.
@@ -107,14 +107,14 @@
    ln_tsd_interp = .true.   !  Interpolation of T & S in the verticalinput data (T) or not (F)
    ln_tsd_dmp    = .false.  !  T-S restoring   (see namtra_dmp)
    
-   cn_dir      = './'      !  root directory for the T-S data location
+   cn_dir      = './INPUTS/inputs/IC/'      !  root directory for the T-S data location
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   sn_tem      = 'initcd_y2005m01.nc',             -12.,        'toce',      .true.      ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
-   sn_sal      = 'initcd_y2005m01.nc',             -12.,        'soce',      .true.      ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
-   sn_dep      = 'initcd_y2005m01.nc',             -12.,        'gdept',     .false.     ,  .true., 'yearly'  ,    ''            , ''       ,    ''
-   sn_msk      = 'initcd_y2005m01.nc',             -12.,        'mask',      .false.     ,  .true., 'yearly'  ,    ''            , ''       ,    ''
+   sn_tem      = 'initcd_ud_y2005m01.nc',             -12.,        'toce',      .true.      ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
+   sn_sal      = 'initcd_ud_y2005m01.nc',             -12.,        'soce',      .true.      ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
+   sn_dep      = 'initcd_ud_y2005m01.nc',             -12.,        'gdept',     .false.     ,  .true., 'yearly'  ,    ''            , ''       ,    ''
+   sn_msk      = 'initcd_ud_y2005m01.nc',             -12.,        'mask',      .false.     ,  .true., 'yearly'  ,    ''            , ''       ,    ''
 /
 !!======================================================================
 !!            ***  Surface Boundary Condition namelists  ***          !!
@@ -165,7 +165,7 @@
    nn_fwb      = 0         !  FreshWater Budget: =0 unchecked
       !                    !     =1 global mean of e-p-r set to zero at each time step
       !                    !     =2 annual global mean of e-p-r set to zero
-   ln_rnf      = .true.    !  runoffs                                   (T => fill namsbc_rnf)
+   ln_rnf      = .false.    !  runoffs                                   (T => fill namsbc_rnf)
    ln_apr_dyn  = .true.    !  Patm gradient added in ocean & ice Eqs.   (T => fill namsbc_apr )
    ln_isf      = .false.   !  ice shelf                                 (T   => fill namsbc_isf & namsbc_iscpl)
    ln_wave     = .false.   !  Activate coupling with wave  (T => fill namsbc_wave)
@@ -200,7 +200,7 @@
       rn_vfac     = 0.        !  multiplicative factor for ocean & ice velocity used to
       !                       !  calculate the wind stress (0.=absolute or 1.=relative winds)
 
-   cn_dir      = './SBC/'           !  root directory for the fluxes data location
+   cn_dir      = './INPUTS/inputs/SBC/'           !  root directory for the fluxes data location
    !___________!_________________________!___________________!___________!_____________!________!___________!______________________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename             ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                              ! pairing  !    filename   !
@@ -228,7 +228,7 @@
    nn_chldta   =   0          !  RGB : Chl data (=1) or cst value (=0)
    rn_si1      =   23.0       !  2BD : longest depth of extinction
 
-   cn_dir      = './SBC/'      !  root directory for the chlorophyl data location
+   cn_dir      = './INPUTS/inputs/SBC/'      !  root directory for the chlorophyl data location
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
@@ -243,7 +243,7 @@
                            !  or to SSS only (=1) or no damping term (=0)
    rn_deds     =  -27.7    !  magnitude of the damping on salinity   [mm/day]
 
-   cn_dir      = './SBC/' !  root directory for the location of the runoff files
+   cn_dir      = './INPUTS/inputs/SBC/' !  root directory for the location of the runoff files
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
@@ -260,7 +260,7 @@
    ln_rnf_tem    = .false.   !  read in temperature information for runoff
    ln_rnf_sal    = .false.   !  read in salinity information for runoff
    rn_rfact      =  1.e0     !  multiplicative factor for runoff
-   cn_dir = './RIV/'  !  root directory for the flux data location
+   cn_dir = './INPUTS/inputs/RIV/'  !  root directory for the flux data location
    !___________!_________________________________!___________________!___________!_____________!_________!___________!__________________!__________!_______________!
    !           !  file name                      ! frequency (hours) ! variable  ! time interp.!  clim   ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                                 !  (if <0  months)  !   name    !   (logical) !  (T/F)  ! 'monthly' !                  ! pairing  !    filename   !
@@ -277,7 +277,7 @@
    ln_ref_apr  = .false.   !  ref. pressure: global mean Patm (T) or a constant (F)
    ln_apr_obc  = .true.    !  inverse barometer added to OBC ssh data
 
-   cn_dir = './SBC/'        !  root directory for the Patm data location
+   cn_dir = './INPUTS/inputs/SBC/'        !  root directory for the Patm data location
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
@@ -370,7 +370,7 @@
    !                          !  automatically defined to T if the number of vertical levels in bdy dta /= jpk
    ln_full_vel = .false.      !  T if [uv]3d are "full" velocities and not only its baroclinic components
    !
-   cn_dir  = './BDY/'
+   cn_dir  = './INPUTS/inputs/BDY/2005/'
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
@@ -389,7 +389,7 @@
    !                          !  automatically defined to T if the number of vertical levels in bdy dta /= jpk
    ln_full_vel = .false.       !  T if [uv]3d are "full" velocities and not only its baroclinic components
    !
-   cn_dir  =   './BDY_SKAG/'
+   cn_dir  =   './INPUTS/inputs/BDY_SKAG/2005/'
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
@@ -404,7 +404,7 @@
 !-----------------------------------------------------------------------
 &nambdy_tide   !  tidal forcing at open boundaries
 !-----------------------------------------------------------------------
-   filtide      = 'TIDE/amm7_bdytide_'      !  file name root of tidal forcing files
+   filtide      = './INPUTS/inputs/TIDE/FES/amm7_bdytide_'      !  file name root of tidal forcing files
 /
 !!======================================================================
 !!                ***  Top/Bottom boundary condition  ***             !!
@@ -660,8 +660,8 @@
    ln_listonly =  .false.  !  do nothing else than listing the best domain decompositions (with land domains suppression)
    !                       !  if T: the largest number of cores tested is defined by max(mppsize, jpni*jpnj)
    ln_nnogather =  .true.  !  activate code to avoid mpi_allgather use at the northfold
-   jpni        = 11      !  jpni   number of processors following i (set automatically if < 1)
-   jpnj        = 11      !  jpnj   number of processors following j (set automatically if < 1)
+   jpni        = 0      !  jpni   number of processors following i (set automatically if < 1)
+   jpnj        = 0      !  jpnj   number of processors following j (set automatically if < 1)
 /
 !-----------------------------------------------------------------------
 &namctl        !   Control prints                                       (default: OFF)
