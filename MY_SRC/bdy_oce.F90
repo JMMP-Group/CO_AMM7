@@ -42,9 +42,9 @@ MODULE bdy_oce
    TYPE, PUBLIC ::   OBC_DATA     !: Storage for external data
       INTEGER          , DIMENSION(2)   ::  nread
       LOGICAL                           ::  lneed_ssh
-!--- NB
-      LOGICAL                           ::  lforced_ssh 
-!--- END NB
+      !--- RDP
+      LOGICAL                           ::  lforced_ssh
+      !--- END RDP
       LOGICAL                           ::  lneed_dyn2d
       LOGICAL                           ::  lneed_dyn3d
       LOGICAL                           ::  lneed_tra
@@ -65,6 +65,7 @@ MODULE bdy_oce
       REAL(wp), POINTER, DIMENSION(:,:) ::  s_i    !: now ice  salinity
       REAL(wp), POINTER, DIMENSION(:,:) ::  aip    !: now ice  pond concentration
       REAL(wp), POINTER, DIMENSION(:,:) ::  hip    !: now ice  pond depth
+      REAL(wp), POINTER, DIMENSION(:,:) ::  hil    !: now ice  pond lid depth
 #if defined key_top
       CHARACTER(LEN=20)                   :: cn_obc  !: type of boundary condition to apply
       REAL(wp)                            :: rn_fac  !: multiplicative scaling factor
@@ -117,11 +118,12 @@ MODULE bdy_oce
    REAL(wp), DIMENSION(jp_bdy) ::   rice_age                !: age         of incoming sea ice
    REAL(wp), DIMENSION(jp_bdy) ::   rice_apnd               !: pond conc.  of incoming sea ice
    REAL(wp), DIMENSION(jp_bdy) ::   rice_hpnd               !: pond thick. of incoming sea ice
-
-!  NB from JT 
+   REAL(wp), DIMENSION(jp_bdy) ::   rice_hlid               !: pond lid thick. of incoming sea ice
+   !
+   !  RDP
    LOGICAL, DIMENSION(jp_bdy) ::   ln_ssh_bdy               !: =T USE SSH BDY - name list switch
    REAL(wp), DIMENSION(jp_bdy) ::  rn_ssh_shift             !: =F SHIFT SSH AT A BORDER BY rn_ssh_shift m_
-!  END NB
+   !  END RDP
 
    !
    !!----------------------------------------------------------------------
@@ -143,15 +145,17 @@ MODULE bdy_oce
    TYPE(OBC_INDEX), DIMENSION(jp_bdy), TARGET      ::   idx_bdy           !: bdy indices (local process)
    TYPE(OBC_DATA) , DIMENSION(jp_bdy), TARGET      ::   dta_bdy           !: bdy external data (local process)
 !$AGRIF_END_DO_NOT_TREAT
-   LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lsend_bdy      !: mark needed communication for given boundary, grid and neighbour
-   LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lrecv_bdy      !:  when searching in any direction
+   LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lsend_bdyolr   !: mark needed communication for given boundary, grid and neighbour
+   LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lrecv_bdyolr   !:  when searching in any direction (only for orlansky)
    LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lsend_bdyint   !: mark needed communication for given boundary, grid and neighbour
    LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lrecv_bdyint   !:  when searching towards the interior of the computational domain
    LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lsend_bdyext   !: mark needed communication for given boundary, grid and neighbour
    LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lrecv_bdyext   !:  when searching towards the exterior of the computational domain
+   !! * Substitutions
+#  include "do_loop_substitute.h90"
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
-   !! $Id: bdy_oce.F90 11536 2019-09-11 13:54:18Z smasson $ 
+   !! $Id: bdy_oce.F90 15354 2021-10-12 13:44:46Z smasson $ 
    !! Software governed by the CeCILL license (see ./LICENSE)
    !!----------------------------------------------------------------------
 CONTAINS
@@ -178,4 +182,3 @@ CONTAINS
 
    !!======================================================================
 END MODULE bdy_oce
-

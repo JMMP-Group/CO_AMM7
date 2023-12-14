@@ -15,11 +15,10 @@ The key update in this version of the AMM7 configuration is the change to a mult
 
 |  **Configuration ** | **Specification** |
 |-------------- | -------------- |
-| **Nemo-ocean repository** | http://forge.ipsl.jussieu.fr/nemo/svn/NEMO |
-| **Branch** | releases/r4.0/r4.0.2 |
+| **Nemo-ocean repository** | https://forge.nemo-ocean.eu/nemo/nemo.git |
+| **Branch** | 4.2.1 tagged release |
 | **Components** | OCE |
-| **CPP keys** | key_mpp_mpi key_vectopt_loop key_nosignedzero key_iomput |
-| **Grid** | ORCA |
+| **CPP keys** | key_nosignedzero key_xios key_qco |
 | **Resolution** | 7 km |
 | **Horizontal Gridpoints** | 111,375 (y=375, x=297) |
 | **Vertical Levels** | 51 |
@@ -33,36 +32,59 @@ The key update in this version of the AMM7 configuration is the change to a mult
 
 To clone the git repository locally
 ```
-git clone git@github.com:JMMP-Group/CO9_AMM7.git
+cd <path to directory to install repo into>
+git clone git@github.com:JMMP-Group/CO9_AMM7_v4.2.git
 ```
 
 To then download NEMO and copy files from the git repo into the appropriate directories 
 ```
-./CO9_AMM7/scripts/setup/amm7_setup_light -w $PWD/CO9_AMM7_instance -s $PWD/CO9_AMM7
+CO9_AMM7_v4.2/scripts/setup/amm7_setup_light -w <path to directory to install NEMO into> -s <path to the repo>
 ```
 
-For ARCHER2 follow the instructions [here](https://github.com/hpc-uk/build-instructions/tree/main/apps/NEMO) to compile XIOS and then setup the compiler configuration file for NEMO.
-NEMO can then be compiled with
+The remaining setup instructions are machine dependent and beyond scope. For ARCHER2i, instructions can be found [here](https://github.com/hpc-uk/build-instructions/tree/main/apps/NEMO).
+
+As an example the following process has been used on ARCHER2 using XIOS2 and the CRAY compiler (valid at 14th Dec 2023)
+
+Get compiler option files using a shared XIOS2 install
 ```
-cd CO9_AMM7_instance/nemo
-./makenemo -m X86_ARCHER2-Cray -r AMM7 -j 16
+cd <path to your nemo install>/nemo_4.2.1
+cp /work/n01/shared/nemo/ARCH/*4.2.fcm arch/NOC/.
+```
+Load appropriate modules
+```
+module swap craype-network-ofi craype-network-ucx
+module swap cray-mpich cray-mpich-ucx
+module load cray-hdf5-parallel/1.12.2.1
+module load cray-netcdf-hdf5parallel/4.9.0.1
+
+```
+Compile NEMO
+```
+./makenemo -m X86_ARCHER2-Cray_4.2 -r AMM7 -j 16
 ```
 
-Create a link to xios in the experiment (i.e. EXP00) directory, e.g.
+Create a link to xios in the EXP00 directory
 ```
-ln -s ${PRFX}/xios/2.5/cmpich8-ucx/cce12/bin/xios_server.exe xios_server.exe
+cd cfgs/AMM7
+ln -s /work/n01/shared/nemo/XIOS2_Cray/bin/xios_server.exe EXP00/xios_server.exe
 ```
-Input files can then be downloaded into the experiment directory  and the configuration should then be setup. A sample runscript is included to run on ARCHER2 in the EXP00 directory.
+Create links to the nemo and xios executables from your reference experiment directory
+```
+cd EXP_REF
+ln -s ../EXP00/xios_server.exe xios_server.exe
+ln -s ../EXP00/nemo.exe nemo.exe
+```
 
+Input files can then be downloaded to the nemo_4.2.1/cfgs/AMM7/INPUTS child directories. Note these direcotries will need to be linked to in the EXP_REF directory.
 ---
 
 ## Configuration Input Files
 
 |  **Input** | **Download Location** |
 |-------------- | -------------- |
-| **Domain_cfg.nc** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc |
-| **Open ocean boundary coordinates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/grid/coordinates.bdy.nc |
-| **Baltic coordimates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/grid/coordinates.skagbdy.nc |
+| **Domain_cfg.nc** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc |
+| **Open ocean boundary coordinates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/grid/coordinates.bdy.nc |
+| **Baltic coordimates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/grid/coordinates.skagbdy.nc |
 
 ---
 
@@ -70,11 +92,13 @@ Input files can then be downloaded into the experiment directory  and the config
 
 | **Forcing** | **Download Location** |
 |-------------- | ------------------|
-| **Surface boundary** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/SBC/ |
-| **Open ocean boundary** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/BDY/ |
-| **Baltic boundary** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/BDY_SKAG/ |
-| **River runoff** | http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/RIV/ |
-| **Tide** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/TIDE/ |
-| **Initial condition** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/IC/ |
+| **Surface boundary** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/SBC/ |
+| **Open ocean boundary** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/BDY/ |
+| **Baltic boundary** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/BDY_SKAG/ |
+| **River runoff** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/RIV/ |
+| **Tide** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/TIDE/ |
+| **Initial condition** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/inputs/IC/ |
 
 ---
+
+

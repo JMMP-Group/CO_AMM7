@@ -6,10 +6,9 @@ display_usage() {
    echo "  Auto-Config: AMM7 on ARCHER2"
    echo "  ***************************************"
    echo
-   echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
+   echo "  usage: ${0##*/} -w path_to_install_nemo -s path_to_repo"
    echo
    echo "  flags:  -w full path to where nemo will be installed"
-   echo "          -x full path to where xios will be installed"
    echo "          -s full path to where AMM7 repository resides"
    echo
    exit 1
@@ -55,31 +54,39 @@ cd $WORK_DIR
 
 # Checkout the NEMO code from the SVN Paris repository 
 echo "Checking out NEMO repository"
-svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r4.0.2 nemo
+git clone --branch 4.2.1 https://forge.nemo-ocean.eu/nemo/nemo.git nemo_4.2.1
 
 mkdir $WORK_DIR/nemo/cfgs/AMM7
 
-cd $WORK_DIR/nemo
+cd $WORK_DIR/nemo_4.2.1
 
-echo 'AMM7 OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+echo 'AMM7 OCE' >> $WORK_DIR/nemo_4.2.1/cfgs/work_cfgs.txt
 
 mkdir cfgs/AMM7/EXP00
+mkdir cfgs/AMM7/EXP_REF
 
-export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7
+export CONFIG_DIR=$WORK_DIR/nemo_4.2.1/cfgs/AMM7
 
-cd $CONFIG_DIR/EXP00
+cd $CONFIG_DIR/EXP_REF
 ln -s ../../SHARED/namelist_ref namelist_ref
 ln -s ../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
-ln -s ../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
 ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
 
-cp $REPO_DIR/EXP00/namelist_ref $CONFIG_DIR/../SHARED/
-cp $REPO_DIR/EXP00/* $CONFIG_DIR/EXP00/
-cp -r $REPO_DIR/MY_SRC $CONFIG_DIR
-cp $REPO_DIR/cpp_AMM7.fcm $CONFIG_DIR/
+cp $REPO_DIR/EXP/* $CONFIG_DIR/EXP_REF/.
+cp -r $REPO_DIR/MY_SRC $CONFIG_DIR/.
+cp $REPO_DIR/cpp_AMM7.fcm $CONFIG_DIR/.
 
-cd $WORK_DIR/nemo
-
-#echo "Compiling nemo AMM7 Config"
-#./makenemo -m archer -r AMM7 -j 8
-
+cd $CONFIG_DIR
+mkdir INPUTS
+cd INPUTS
+mkdir BDY
+mkdir TIDE
+mkdir SBC
+mkdir RIV
+mkdir DOM
+mkdir IC
+cd BDY
+mkdir COORD
+mkdir OPEN
+mkdir SKAG
+cd $WORK_DIR/nemo_4.2.1
