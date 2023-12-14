@@ -1,10 +1,12 @@
-# CO9 AMM7 (Coastal Ocean Atlantic Margin Model 7km) 
+# CO9 AMM7 @ NEMO 4.2.1 (Coastal Ocean Atlantic Margin Model 7km) 
 
 The Joint Marine Modelling Programme [(JMMP)](https://www.metoffice.gov.uk/research/approach/collaboration/joint-marine-modelling-programme) provides world-class and easily accessible national capability, ocean modelling infrastructure and configurations to support the UK’s scientific research and operational prediction systems for ocean, weather and climate. It is partnership between the Met Office and British Antarctic Survey, National Oceanography Centre and Centre for Polar Observation and Modelling.
 
 Model configurations are underpinned by the Nucleus for European Modelling of the Ocean [(NEMO)](https://www.nemo-ocean.eu) framework. JMMP works closely with the NEMO consortium to develop the underpinning model capability. 
 
-The key update in this version of the AMM7 configuration is the change to a multi-envelope vertical coordinate system (from a quasi-sigma terrain following system). Details of this vertical coordinate system change can be found in the Ocean Modelling article [The effect of vertical coordinates on the accuracy of a shelf sea model](https://doi.org/10.1016/j.ocemod.2021.101935) and accompanying [repository](https://zenodo.org/badge/latestdoi/235544712). 
+This branch of the repository is a DRAFT version of the CO9 AMM7 configuration at NEMO version 4.2.1 (the Master and CO9_AMM7 branches use NEMO at version 4.0.2). 
+
+Change to the configuration to note include a change of pressure gradient scheme from PRJ to DJC and a change of equation of state from EOS80 to TEOS10 (conservative temperature and absolute salinity must now be supplied). Currently the surface bulk formulation is set to ECMWF (consisitent with ERA5 forcing) rather than COARE. The MY_SRC files have been harmonised with AMM15. 
 
 ---
 
