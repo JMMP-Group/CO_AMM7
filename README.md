@@ -6,7 +6,8 @@ Model configurations are underpinned by the Nucleus for European Modelling of th
 
 The key update in this version of the AMM7 configuration is the change to a multi-envelope vertical coordinate system (from a quasi-sigma terrain following system). Details of this vertical coordinate system change can be found in the Ocean Modelling article [The effect of vertical coordinates on the accuracy of a shelf sea model](https://doi.org/10.1016/j.ocemod.2021.101935) and accompanying [repository](https://zenodo.org/badge/latestdoi/235544712). 
 
-This branch relates to sea level sensitivity experiements conducted using CO9_AMM7 and discussed in a paper submited to JGR:Oceans by Anthony Wise et. al.
+This branch relates to sea level sensitivity experiements and momentum budget calculations conducted using CO9_AMM7 and discussed in a paper submited to JGR:Oceans by Anthony Wise et. al.
+The MY_SRC files are NEMO source files that contain AMM7 specific code and modifications to the diagnostics which the model outputs.
 ---
 
 ## Configuration
