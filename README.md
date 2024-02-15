@@ -1,13 +1,19 @@
 # CO9 AMM7 (Coastal Ocean Atlantic Margin Model 7km) 
 
+This branch relates to sea level sensitivity experiements and momentum budget calculations conducted using CO9_AMM7 and discussed in the paper "Using shelfedge transport composition and sensitivity experiments to understand processes driving sea level on the Northwest European Shelf" submited to JGR:Oceans in Novemeber 2023 by Wise, Anthony; Calafat, Francisco M.; Hughes, Christopher W.; Jevrejeva, Svetlana; Katsman, Caroline A.; Oelsmann, Julius; Piecuch, Christopher G.; Polton, Jeff A.; Richter, Kristin.
+
+The files in MY_SRC and EXP00 are required to produce the output analysed in the paper.
+
+The MY_SRC files are NEMO source files that contain AMM7 specific code and modifications to the diagnostics which the model outputs. 
+
+The EXP00 files contain the configuration setup in namelist_cfg and namelist_ref and .xml files relate to controlling output from the model.
+
+This branch uses the AMM7 configuration detailed in the Ocean Modelling article [The effect of vertical coordinates on the accuracy of a shelf sea model](https://doi.org/10.1016/j.ocemod.2021.101935) and accompanying [repository](https://zenodo.org/badge/latestdoi/235544712). The vertical coodinate reference used are MEs_r10_r07. This branch adds diagnostic outputs only. Specifically, outlputs of online momentum trend calculations at NEMO v4.0.2 ported from the NEMO changeset https://forge.ipsl.jussieu.fr/nemo/changeset/14689/NEMO/branches/2021/ENHANCE-01_davestorkey_fix_3D_momentum_trends by Dave Storkey. This branch also added output of monthly mean sea level diagnostics related to horizontal divergence as described in the paper.
+
 The Joint Marine Modelling Programme [(JMMP)](https://www.metoffice.gov.uk/research/approach/collaboration/joint-marine-modelling-programme) provides world-class and easily accessible national capability, ocean modelling infrastructure and configurations to support the UK’s scientific research and operational prediction systems for ocean, weather and climate. It is partnership between the Met Office and British Antarctic Survey, National Oceanography Centre and Centre for Polar Observation and Modelling.
 
 Model configurations are underpinned by the Nucleus for European Modelling of the Ocean [(NEMO)](https://www.nemo-ocean.eu) framework. JMMP works closely with the NEMO consortium to develop the underpinning model capability. 
 
-The key update in this version of the AMM7 configuration is the change to a multi-envelope vertical coordinate system (from a quasi-sigma terrain following system). Details of this vertical coordinate system change can be found in the Ocean Modelling article [The effect of vertical coordinates on the accuracy of a shelf sea model](https://doi.org/10.1016/j.ocemod.2021.101935) and accompanying [repository](https://zenodo.org/badge/latestdoi/235544712). 
-
-This branch relates to sea level sensitivity experiements and momentum budget calculations conducted using CO9_AMM7 and discussed in a paper submited to JGR:Oceans by Anthony Wise et. al. The files in MY_SRC and EXP00 are required to produce the output analysed in the paper.
-The MY_SRC files are NEMO source files that contain AMM7 specific code and modifications to the diagnostics which the model outputs. The EXP00 files contain the configuration setup in namelist_cfg and namelist_ref and .xml files relate to controlling output from the model.
 ---
 
 ## Configuration
