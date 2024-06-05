@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=v421djc
-#SBATCH --time=14:00:00
+#SBATCH --time=20:00
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-core=1
 #SBATCH --account=n01-class
 #SBATCH --partition=standard
-#SBATCH --qos=standard
+#SBATCH --qos=short
 #SBATCH -o %A_%a.out
 #SBATCH -e %A_%a.err
 
