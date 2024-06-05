@@ -1,18 +1,14 @@
-# CO9 AMM7 (Coastal Ocean Atlantic Margin Model 7km) 
+# CO9p2 AMM7 (Coastal Ocean Atlantic Margin Model 7km. NEMOv4.0.4)
 
-This branch relates to sea level sensitivity experiements and momentum budget calculations conducted using CO9_AMM7 and discussed in the paper "Using shelfedge transport composition and sensitivity experiments to understand processes driving sea level on the Northwest European Shelf" submited to JGR:Oceans in Novemeber 2023 by Wise, Anthony; Calafat, Francisco M.; Hughes, Christopher W.; Jevrejeva, Svetlana; Katsman, Caroline A.; Oelsmann, Julius; Piecuch, Christopher G.; Polton, Jeff A.; Richter, Kristin.
+This release of AMM7 was created to match the [AMM15 branch for CO9](https://github.com/JMMP-Group/CO_AMM15/tree/CO9) and associated [release](https://github.com/JMMP-Group/CO_AMM15/releases/tag/v9.2.1)
+It is not directly tracible to other AMM7 releases. The closest neighbours (at 4.0.2 and 4.2) have additional code to diagnose momentum budgets. These changes are quite invasive and are not in the AMM15 CO9p2 configuration so were not included in this AMM7 release. (NB the changes to momentum budgets do appear in the subsequent AMM15 configurations, inline with developments made in AMM7)
 
-The files in MY_SRC and EXP00 are required to produce the output analysed in the paper.
+The AMM7 neighbour at NEMOv4.0.2 is discussed in the paper "Using shelfedge transport composition and sensitivity experiments to understand processes driving sea level on the Northwest European Shelf" submited to JGR:Oceans in Novemeber 2023 by Wise, Anthony; Calafat, Francisco M.; Hughes, Christopher W.; Jevrejeva, Svetlana; Katsman, Caroline A.; Oelsmann, Julius; Piecuch, Christopher G.; Polton, Jeff A.; Richter, Kristin.
+This neighbouring AMM7 configuration is detailed in the Ocean Modelling article [The effect of vertical coordinates on the accuracy of a shelf sea model](https://doi.org/10.1016/j.ocemod.2021.101935) and accompanying [repository](https://zenodo.org/badge/latestdoi/235544712). The vertical coordinate reference used are MEs_r10_r07. This branch updates the NEMO codebase from 4.0.2 to 4.0.4.
 
-The MY_SRC files are NEMO source files that contain AMM7 specific code and modifications to the diagnostics which the model outputs. 
+The Joint Marine Modelling Programme [(JMMP)](https://www.metoffice.gov.uk/research/approach/collaboration/joint-marine-modelling-programme) provides world-class and easily accessible national capability, ocean modelling infrastructure and configurations to support the UK’s scientific research and operational prediction systems for ocean, weather and climate. It is partnership between the Met Office and British Antarctic Survey, National Oceanography Centre and Centre for Polar Observation and Modelling.
 
-The EXP00 files contain the configuration setup in namelist_cfg and namelist_ref and .xml files relate to controlling output from the model.
-
-This branch uses the AMM7 configuration detailed in the Ocean Modelling article [The effect of vertical coordinates on the accuracy of a shelf sea model](https://doi.org/10.1016/j.ocemod.2021.101935) and accompanying [repository](https://zenodo.org/badge/latestdoi/235544712). The vertical coodinate reference used are MEs_r10_r07. This branch adds diagnostic outputs only. Specifically, outlputs of online momentum trend calculations at NEMO v4.0.2 ported from the NEMO changeset https://forge.ipsl.jussieu.fr/nemo/changeset/14689/NEMO/branches/2021/ENHANCE-01_davestorkey_fix_3D_momentum_trends by Dave Storkey. This branch also added output of monthly mean sea level diagnostics related to horizontal divergence as described in the paper.
-
-The Joint Marine Modelling Programme [(JMMP)](https://www.metoffice.gov.uk/research/approach/collaboration/joint-marine-modelling-programme) provides world-class and easily accessible national capability, ocean modelling infrastructure and configurations to support the UK’s scientific research and operational prediction systems for ocean, weather and climate. It is partnership between the Met Office and British Antarctic Survey, National Oceanography Centre and Centre for Polar Observation and Modelling.
-
-Model configurations are underpinned by the Nucleus for European Modelling of the Ocean [(NEMO)](https://www.nemo-ocean.eu) framework. JMMP works closely with the NEMO consortium to develop the underpinning model capability. 
+Model configurations are underpinned by the Nucleus for European Modelling of the Ocean [(NEMO)](https://www.nemo-ocean.eu) framework. JMMP works closely with the NEMO consortium to develop the underpinning model capability. 
 
 ---
 
@@ -24,9 +20,9 @@ Model configurations are underpinned by the Nucleus for European Modelling of th
 |  **Configuration ** | **Specification** |
 |-------------- | -------------- |
 | **Nemo-ocean repository** | http://forge.ipsl.jussieu.fr/nemo/svn/NEMO |
-| **Branch** | releases/r4.0/r4.0.2 |
+| **Branch** | releases/r4.0/r4.0.2  Revision=13653|
 | **Components** | OCE |
-| **CPP keys** | key_mpp_mpi key_vectopt_loop key_nosignedzero key_iomput |
+| **CPP keys** | key_mpp_mpi key_nosignedzero key_iomput |
 | **Grid** | ORCA |
 | **Resolution** | 7 km |
 | **Horizontal Gridpoints** | 111,375 (y=375, x=297) |
@@ -41,26 +37,34 @@ Model configurations are underpinned by the Nucleus for European Modelling of th
 
 To clone the git repository locally
 ```
-git clone git@github.com:JMMP-Group/CO9_AMM7_sea_level_sensitivity.git
+git clone git@github.com:JMMP-Group/CO_AMM7.git
+git checkout CO9_AMM7_v4.0.4  # or get the release code
 ```
 
-To then download NEMO and copy files from the git repo into the appropriate directories 
+# Run the setup script on ARCHER2
 ```
-./CO9_AMM7/scripts/setup/amm7_setup_light -w $PWD/CO9_AMM7_instance -s $PWD/CO9_AMM7
+cd CO_AMM7
+
+./scripts/setup/setup_AMM7_CO9_P2_archer -w <WORKING_DIRECTORY> -s <REPOSITORY_DIRECTORY>
+# e.g. ./scripts/setup/setup_AMM7_CO9_P2_archer -w /work/n01/n01/$USER/CO_AMM7 -s /work/n01/n01/$USER/CO_AMM7
 ```
 
-For ARCHER2 follow the instructions [here](https://github.com/hpc-uk/build-instructions/tree/main/apps/NEMO) to compile XIOS and then setup the compiler configuration file for NEMO.
-NEMO can then be compiled with
-```
-cd CO9_AMM7_instance/nemo
-./makenemo -m X86_ARCHER2-Cray -r AMM7 -j 16
-```
+This will obtain the base code from the NEMO repository, build XIOS and build NEMO with the changes given in MY_SRC.
 
-Create a link to xios in the experiment (i.e. EXP00) directory, e.g.
+Input files can then be downloaded into the experiment directory  and the configuration should then be setup. A sample runscript is included to run on ARCHER2 .
+
+For example:
 ```
-ln -s ${PRFX}/xios/2.5/cmpich8-ucx/cce12/bin/xios_server.exe xios_server.exe
+cd /work/n01/n01/$USER/CO_AMM7/CO9_AMM7_P2/nemo/cfgs/AMM7
+cp -rP EXPREF EXP01
+
+cd /work/n01/n01/$USER/CO_AMM7/CO9_AMM7_P2/nemo/cfgs/AMM7/EXP01
+. /work/n01/n01/$USER/CO_AMM7/scripts/setup/setup_P2_files.sh
+
+cd EXP01
+cp /work/n01/n01/$USER/CO_AMM7/scripts/run/runscript.slurm .
+sbatch runscript.slurm
 ```
-Input files can then be downloaded into the experiment directory  and the configuration should then be setup. A sample runscript is included to run on ARCHER2 in the EXP00 directory.
 
 ---
 
