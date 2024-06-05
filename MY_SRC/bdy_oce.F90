@@ -42,9 +42,9 @@ MODULE bdy_oce
    TYPE, PUBLIC ::   OBC_DATA     !: Storage for external data
       INTEGER          , DIMENSION(2)   ::  nread
       LOGICAL                           ::  lneed_ssh
-!--- NB
+      !--- davbyr
       LOGICAL                           ::  lforced_ssh 
-!--- END NB
+	  !--- END davbyr
       LOGICAL                           ::  lneed_dyn2d
       LOGICAL                           ::  lneed_dyn3d
       LOGICAL                           ::  lneed_tra
@@ -65,6 +65,7 @@ MODULE bdy_oce
       REAL(wp), POINTER, DIMENSION(:,:) ::  s_i    !: now ice  salinity
       REAL(wp), POINTER, DIMENSION(:,:) ::  aip    !: now ice  pond concentration
       REAL(wp), POINTER, DIMENSION(:,:) ::  hip    !: now ice  pond depth
+      REAL(wp), POINTER, DIMENSION(:,:) ::  hil    !: now ice  pond lid depth
 #if defined key_top
       CHARACTER(LEN=20)                   :: cn_obc  !: type of boundary condition to apply
       REAL(wp)                            :: rn_fac  !: multiplicative scaling factor
@@ -117,12 +118,12 @@ MODULE bdy_oce
    REAL(wp), DIMENSION(jp_bdy) ::   rice_age                !: age         of incoming sea ice
    REAL(wp), DIMENSION(jp_bdy) ::   rice_apnd               !: pond conc.  of incoming sea ice
    REAL(wp), DIMENSION(jp_bdy) ::   rice_hpnd               !: pond thick. of incoming sea ice
-
-!  NB from JT 
+   REAL(wp), DIMENSION(jp_bdy) ::   rice_hlid               !: pond lid thick. of incoming sea ice
+   
+   !  davbyr 
    LOGICAL, DIMENSION(jp_bdy) ::   ln_ssh_bdy               !: =T USE SSH BDY - name list switch
    REAL(wp), DIMENSION(jp_bdy) ::  rn_ssh_shift             !: =F SHIFT SSH AT A BORDER BY rn_ssh_shift m_
-!  END NB
-
+   !  END davbyr
    !
    !!----------------------------------------------------------------------
    !! Global variables
@@ -151,7 +152,7 @@ MODULE bdy_oce
    LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) ::   lrecv_bdyext   !:  when searching towards the exterior of the computational domain
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
-   !! $Id: bdy_oce.F90 11536 2019-09-11 13:54:18Z smasson $ 
+   !! $Id$
    !! Software governed by the CeCILL license (see ./LICENSE)
    !!----------------------------------------------------------------------
 CONTAINS

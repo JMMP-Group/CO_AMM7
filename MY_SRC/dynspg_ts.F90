@@ -60,8 +60,6 @@ MODULE dynspg_ts
    USE prtctl          ! Print control
    USE iom             ! IOM library
    USE restart         ! only for lrst_oce
-   USE trd_oce        ! trends: ocean variables
-   USE trddyn         ! trend manager: dynamics
 
    USE iom   ! to remove
 
@@ -151,7 +149,8 @@ CONTAINS
       INTEGER  ::   noffset               ! local integers  : time offset for bdy update
       REAL(wp) ::   r1_2dt_b, z1_hu, z1_hv          ! local scalars
       REAL(wp) ::   za0, za1, za2, za3              !   -      -
-      REAL(wp) ::   zmdi, zztmp, zldg               !   -      -
+      REAL(wp), DIMENSION(jpi,jpj) :: zdep_u, zdep_v
+      REAL(wp) ::   zztmp, zldg               !   -      -
       REAL(wp) ::   zhu_bck, zhv_bck, zhdiv         !   -      -
       REAL(wp) ::   zun_save, zvn_save              !   -      -
       REAL(wp), DIMENSION(jpi,jpj) :: zu_trd, zu_frc, zu_spg, zssh_frc
@@ -169,44 +168,11 @@ CONTAINS
       REAL(wp), ALLOCATABLE, DIMENSION(:,:) :: zcpx, zcpy   ! Wetting/Dying gravity filter coef.
       REAL(wp), ALLOCATABLE, DIMENSION(:,:) :: ztwdmask, zuwdmask, zvwdmask ! ROMS wetting and drying masks at t,u,v points
       REAL(wp), ALLOCATABLE, DIMENSION(:,:) :: zuwdav2, zvwdav2    ! averages over the sub-steps of zuwdmask and zvwdmask
-      REAL(wp), ALLOCATABLE, DIMENSION(:,:) :: zspgtrdu, zspgtrdv, zpvotrdu, zpvotrdv  ! SPG and PVO trends (if l_trddyn)
-      REAL(wp), ALLOCATABLE, DIMENSION(:,:) :: ztautrdu, ztautrdv, zbfrtrdu, zbfrtrdv  ! TAU and BFR trends (if l_trddyn)
-      REAL(wp), ALLOCATABLE, DIMENSION(:,:) :: ztfrtrdu, ztfrtrdv, ztottrdu, ztottrdv  ! TFR and TOT trends (if l_trddyn)
       !!----------------------------------------------------------------------
       !
       IF( ln_wd_il ) ALLOCATE( zcpx(jpi,jpj), zcpy(jpi,jpj) )
       !                                         !* Allocate temporary arrays
       IF( ln_wd_dl ) ALLOCATE( ztwdmask(jpi,jpj), zuwdmask(jpi,jpj), zvwdmask(jpi,jpj), zuwdav2(jpi,jpj), zvwdav2(jpi,jpj))
-      !
-      IF( l_trddyn ) THEN
-          ALLOCATE( zspgtrdu(jpi,jpj), zspgtrdv(jpi,jpj), zpvotrdu(jpi,jpj), zpvotrdv(jpi,jpj), &
-         &          ztautrdu(jpi,jpj), ztautrdv(jpi,jpj), zbfrtrdu(jpi,jpj), zbfrtrdv(jpi,jpj), &
-         &          ztottrdu(jpi,jpj), ztottrdv(jpi,jpj) )
-          zspgtrdu(:,:) = 0._wp
-          zspgtrdv(:,:) = 0._wp
-          zpvotrdu(:,:) = 0._wp
-          zpvotrdv(:,:) = 0._wp
-          ztautrdu(:,:) = 0._wp
-          ztautrdv(:,:) = 0._wp
-          zbfrtrdu(:,:) = 0._wp
-          zbfrtrdv(:,:) = 0._wp
-          ztottrdu(:,:) = 0._wp
-          ztottrdv(:,:) = 0._wp
-!AW
-          IF( ln_isfcav ) THEN
-!          IF( ln_isfcav.OR.ln_drgice_imp ) THEN          ! top+bottom friction (ocean cavities)
-             ALLOCATE( ztfrtrdu(jpi,jpj), ztfrtrdv(jpi,jpj) )
-             ztfrtrdu(:,:) = 0._wp
-             ztfrtrdv(:,:) = 0._wp
-          ENDIF            
-      ENDIF
-      !
-      zu_trd(:,:) = 0._wp
-      zv_trd(:,:) = 0._wp
-      zu_spg(:,:) = 0._wp
-      zv_spg(:,:) = 0._wp
-      !
-      zmdi=1.e+20                               !  missing data indicator for masking
       !
       zwdramp = r_rn_wdmin1               ! simplest ramp 
 !     zwdramp = 1._wp / (rn_wdmin2 - rn_wdmin1) ! more general ramp
@@ -283,17 +249,7 @@ CONTAINS
       CALL dyn_cor_2d( hu_n, hv_n, un_b, vn_b, zhU, zhV,  &   ! <<== in
          &                               zu_trd, zv_trd   )   ! ==>> out
       !
-      IF( l_trddyn ) THEN
-         ! send correction to baroclinic planetary vorticity trend to trd_dyn
-         CALL trd_dyn( zu_trd, zv_trd, jpdyn_pvo_corr, kt )
-      ENDIF
-      !
       IF( .NOT.ln_linssh ) THEN                 !* surface pressure gradient   (variable volume only)
-         !
-         IF( l_trddyn ) THEN
-            zspgtrdu(:,:) = zu_trd(:,:)
-            zspgtrdv(:,:) = zv_trd(:,:)
-         ENDIF
          !
          IF( ln_wd_il ) THEN                       ! W/D : limiter applied to spgspg
             CALL wad_spg( sshn, zcpx, zcpy )          ! Calculating W/D gravity filters, zcpx and zcpy
@@ -314,16 +270,6 @@ CONTAINS
             END DO
          ENDIF
          !
-         IF( l_trddyn ) THEN
-            zspgtrdu(:,:) = zu_trd(:,:) - zspgtrdu(:,:) 
-            zspgtrdv(:,:) = zv_trd(:,:) - zspgtrdv(:,:) 
-            ! send correction to HPG trend to trd_dyn
-            CALL trd_dyn( zspgtrdu, zspgtrdv, jpdyn_hpg_corr, kt )
-            ! reset temporary arrays for use later
-            zspgtrdu(:,:) = 0._wp
-            zspgtrdv(:,:) = 0._wp
-         ENDIF
-         !
       ENDIF
       !
       DO jj = 2, jpjm1                          ! Remove coriolis term (and possibly spg) from barotropic trend
@@ -335,19 +281,7 @@ CONTAINS
       !
       !                                   !=  Add bottom stress contribution from baroclinic velocities  =!
       !                                   !  -----------------------------------------------------------  !
-      IF( l_trddyn ) THEN
-         !
-         ! Output constant forcing terms (excluding top and bottom stresses) as diagnostics.
-         CALL trd_dyn( zu_frc, zv_frc, jpdyn_frc2d, kt )
-         !
-         CALL dyn_drg_init( zu_frc, zv_frc, zCdU_u, zCdU_v, &     ! also provide the barotropic drag coefficients
-              &             ztfrtrdu, ztfrtrdv, zbfrtrdu, zbfrtrdv )
-         !
-      ELSE
-         !
-         CALL dyn_drg_init( zu_frc, zv_frc, zCdU_u, zCdU_v )      ! also provide the barotropic drag coefficients
-         !
-      ENDIF
+      CALL dyn_drg_init( zu_frc, zv_frc,  zCdU_u, zCdU_v )      ! also provide the barotropic drag coefficients
       !
       !                                   !=  Add atmospheric pressure forcing  =!
       !                                   !  ----------------------------------  !
@@ -374,40 +308,6 @@ CONTAINS
       !
       !                                   !=  Add atmospheric pressure forcing  =!
       !                                   !  ----------------------------------  !
-      IF( l_trddyn ) THEN
-         IF( nn_ice == 2 ) THEN  !  Calculate and output the (partial) ice-ocean stress if using SI3.
-            ztautrdu(:,:) = 0._wp ; ztautrdv(:,:) = 0._wp
-            IF( ln_bt_fw ) THEN                        
-               DO jj = 2, jpjm1
-                  DO ji = fs_2, fs_jpim1   ! vector opt.
-                     ztautrdu(ji,jj) =  r1_rau0 * uiceoc(ji,jj) * r1_hu_n(ji,jj)
-                     ztautrdv(ji,jj) =  r1_rau0 * viceoc(ji,jj) * r1_hv_n(ji,jj)
-                  END DO
-               END DO
-            ELSE
-               zztmp = r1_rau0 * r1_2
-               DO jj = 2, jpjm1
-                  DO ji = fs_2, fs_jpim1   ! vector opt.
-                     ztautrdu(ji,jj) =  zztmp * ( uiceoc_b(ji,jj) + uiceoc(ji,jj) ) * r1_hu_n(ji,jj)
-                     ztautrdv(ji,jj) =  zztmp * ( viceoc_b(ji,jj) + viceoc(ji,jj) ) * r1_hv_n(ji,jj)
-                  END DO
-               END DO
-            ENDIF
-!AW
-            IF( ln_isfcav ) THEN
-!            IF( ln_isfcav.OR.ln_drgice_imp ) THEN
-               ! Save this part of the ice-ocean drag as the first installment of top friction
-               CALL trd_dyn( ztautrdu, ztautrdv, jpdyn_iceoc2d, kt )
-            ELSE
-               ! In this case this is the whole top friction trend
-               CALL trd_dyn( ztautrdu, ztautrdv, jpdyn_tfr, kt )
-            ENDIF
-         ENDIF
-         ! initialise fields for wind stress trends
-         ztautrdu(:,:) = zu_frc(:,:)
-         ztautrdv(:,:) = zv_frc(:,:)
-      ENDIF
-      !
       IF( ln_bt_fw ) THEN                        ! Add wind forcing
          DO jj = 2, jpjm1
             DO ji = fs_2, fs_jpim1   ! vector opt.
@@ -425,12 +325,6 @@ CONTAINS
          END DO
       ENDIF  
       !
-      IF( l_trddyn ) THEN
-         ! wind stress trend diagnostic
-         ztautrdu(:,:) = zu_frc(:,:) - ztautrdu(:,:)
-         ztautrdv(:,:) = zv_frc(:,:) - ztautrdv(:,:) 
-         CALL trd_dyn( ztautrdu, ztautrdv, jpdyn_tau2d, kt )
-      ENDIF
       !              !----------------!
       !              !==  sssh_frc  ==!   Right-Hand-Side of the barotropic ssh equation   (over the FULL domain)
       !              !----------------!
@@ -565,16 +459,14 @@ CONTAINS
             !                          ! ocean u- and v-depth at mid-step   (separate DO-loops remove the need of a lbc_lnk)
             DO jj = 1, jpj
                DO ji = 1, jpim1   ! not jpi-column
-                  zhup2_e(ji,jj) = hu_0(ji,jj) + r1_2 * r1_e1e2u(ji,jj)                        &
-                       &                              * (  e1e2t(ji  ,jj) * zsshp2_e(ji  ,jj)  &
-                       &                                 + e1e2t(ji+1,jj) * zsshp2_e(ji+1,jj)  ) * ssumask(ji,jj)
+                  zhup2_e(ji,jj) = r1_2 * r1_e1e2u(ji,jj) * ( e1e2t(ji  ,jj) * zhtp2_e(ji  ,jj)*scaled_e3t_0_ik  (ji,jj) &
+                                                 &         +  e1e2t(ji+1,jj) * zhtp2_e(ji+1,jj)*scaled_e3t_0_ip1k(ji,jj) ) *ssumask(ji,jj)
                END DO
             END DO
             DO jj = 1, jpjm1        ! not jpj-row
                DO ji = 1, jpi
-                  zhvp2_e(ji,jj) = hv_0(ji,jj) + r1_2 * r1_e1e2v(ji,jj)                        &
-                       &                              * (  e1e2t(ji,jj  ) * zsshp2_e(ji,jj  )  &
-                       &                                 + e1e2t(ji,jj+1) * zsshp2_e(ji,jj+1)  ) * ssvmask(ji,jj)
+                  zhvp2_e(ji,jj) = r1_2 * r1_e1e2v(ji,jj) * ( e1e2t(ji,jj  ) * zhtp2_e(ji,  jj)*scaled_e3t_0_jk  (ji,jj) &
+                                                     &     +  e1e2t(ji,jj+1) * zhtp2_e(ji,jj+1)*scaled_e3t_0_jp1k(ji,jj) ) *ssvmask(ji,jj)
                END DO
             END DO
             !
@@ -593,33 +485,25 @@ CONTAINS
 #if defined key_agrif
          ! Set fluxes during predictor step to ensure volume conservation
          IF( .NOT.Agrif_Root() .AND. ln_bt_fw ) THEN
-!AW that was a 4.0.2 -> 4.0.4 change
-             IF((nbondi == -1).OR.(nbondi == 2)) THEN
-!            IF( l_Westedge ) THEN
+            IF( l_Westedge ) THEN
                DO jj = 1, jpj
                   zhU(2:nbghostcells+1,jj) = ubdy_w(1:nbghostcells,jj) * e2u(2:nbghostcells+1,jj)
                   zhV(2:nbghostcells+1,jj) = vbdy_w(1:nbghostcells,jj) * e1v(2:nbghostcells+1,jj)
                END DO
             ENDIF
-!AW that was a 4.0.2 -> 4.0.4 change
-            IF((nbondi ==  1).OR.(nbondi == 2)) THEN
-!            IF( l_Eastedge ) THEN
+            IF( l_Eastedge ) THEN
                DO jj=1,jpj
                   zhU(nlci-nbghostcells-1:nlci-2,jj) = ubdy_e(1:nbghostcells,jj) * e2u(nlci-nbghostcells-1:nlci-2,jj)
                   zhV(nlci-nbghostcells  :nlci-1,jj) = vbdy_e(1:nbghostcells,jj) * e1v(nlci-nbghostcells  :nlci-1,jj)
                END DO
             ENDIF
-!AW that was a 4.0.2 -> 4.0.4 change
-            IF((nbondj == -1).OR.(nbondj == 2)) THEN
-!            IF( l_Southedge ) THEN
+            IF( l_Southedge ) THEN
                DO ji=1,jpi
                   zhV(ji,2:nbghostcells+1) = vbdy_s(ji,1:nbghostcells) * e1v(ji,2:nbghostcells+1)
                   zhU(ji,2:nbghostcells+1) = ubdy_s(ji,1:nbghostcells) * e2u(ji,2:nbghostcells+1)
                END DO
             ENDIF
-!AW that was a 4.0.2 -> 4.0.4 change
-            IF((nbondj ==  1).OR.(nbondj == 2)) THEN
-!            IF( l_Northedge ) THEN
+            IF( l_Northedge ) THEN
                DO ji=1,jpi
                   zhV(ji,nlcj-nbghostcells-1:nlcj-2) = vbdy_n(ji,1:nbghostcells) * e1v(ji,nlcj-nbghostcells-1:nlcj-2)
                   zhU(ji,nlcj-nbghostcells  :nlcj-1) = ubdy_n(ji,1:nbghostcells) * e2u(ji,nlcj-nbghostcells  :nlcj-1)
@@ -701,23 +585,11 @@ CONTAINS
             zv_spg(2:jpim1,2:jpjm1) = zv_spg(2:jpim1,2:jpjm1) * zcpy(2:jpim1,2:jpjm1)
          ENDIF
          !
-         IF( l_trddyn ) THEN
-            za2 = wgtbtp2(jn)
-            zspgtrdu(:,:) = zspgtrdu(:,:) + za2 * zu_spg(:,:) * ssumask(:,:)
-            zspgtrdv(:,:) = zspgtrdv(:,:) + za2 * zv_spg(:,:) * ssvmask(:,:)
-         ENDIF
-         !
          ! Add Coriolis trend:
          ! zwz array below or triads normally depend on sea level with ln_linssh=F and should be updated
          ! at each time step. We however keep them constant here for optimization.
          ! Recall that zhU and zhV hold fluxes at jn+0.5 (extrapolated not backward interpolated)
          CALL dyn_cor_2d( zhup2_e, zhvp2_e, ua_e, va_e, zhU, zhV,    zu_trd, zv_trd   )
-         !
-         IF( l_trddyn ) THEN
-            za2 = wgtbtp2(jn)
-            zpvotrdu(:,:) = zpvotrdu(:,:) + za2 * zu_trd(:,:) * ssumask(:,:)
-            zpvotrdv(:,:) = zpvotrdv(:,:) + za2 * zv_trd(:,:) * ssvmask(:,:)
-         ENDIF
          !
          ! Add tidal astronomical forcing if defined
          IF ( ln_tide .AND. ln_tide_pot ) THEN
@@ -738,29 +610,6 @@ CONTAINS
                   zv_trd(ji,jj) = zv_trd(ji,jj) + zCdU_v(ji,jj) * vn_e(ji,jj) * hvr_e(ji,jj)
                END DO
             END DO
-            IF( l_trddyn ) THEN
-               za2 = wgtbtp2(jn)
-!AW               
-               IF( ln_isfcav ) THEN
-!               IF( ln_isfcav.OR.ln_drgice_imp ) THEN          ! top+bottom friction (ocean cavities)
-                  DO jj = 2, jpjm1
-                     DO ji = fs_2, fs_jpim1   ! vector opt.
-                        ztfrtrdu(ji,jj) = ztfrtrdu(ji,jj) + za2 * 0.5_wp*( rCdU_top(ji+1,jj)+rCdU_top(ji,jj)) * un_e(ji,jj) * hur_e(ji,jj)
-!AW
-                        ztfrtrdv(ji,jj) = ztfrtrdv(ji,jj) + za2 * 0.5_wp*( rCdU_top(ji,jj+1)+rCdU_top(ji,jj)) * vn_e(ji,jj) * hvr_e(ji,jj)
-!                        ztfrtrdv(ji,jj) = ztfrtrdv(ji,jj) + za2 * 0.5_wp*( rCdU_top(ji+1,jj)+rCdU_top(ji,jj)) * vn_e(ji,jj) * hvr_e(ji,jj)
-                     END DO
-                  END DO
-               ENDIF
-               DO jj = 2, jpjm1
-                  DO ji = fs_2, fs_jpim1   ! vector opt.
-                     zbfrtrdu(ji,jj) = zbfrtrdu(ji,jj) + za2 * 0.5_wp*( rCdU_bot(ji+1,jj)+rCdU_bot(ji,jj)) * un_e(ji,jj) * hur_e(ji,jj)
-!AW
-                     zbfrtrdv(ji,jj) = zbfrtrdv(ji,jj) + za2 * 0.5_wp*( rCdU_bot(ji,jj+1)+rCdU_bot(ji,jj)) * vn_e(ji,jj) * hvr_e(ji,jj)
-!                     zbfrtrdv(ji,jj) = zbfrtrdv(ji,jj) + za2 * 0.5_wp*( rCdU_bot(ji+1,jj)+rCdU_bot(ji,jj)) * vn_e(ji,jj) * hvr_e(ji,jj)
-                  END DO
-               END DO
-            ENDIF
          ENDIF
          !
          ! Set next velocities:
@@ -796,14 +645,21 @@ CONTAINS
                DO ji = 2, jpim1
                   !                    ! hu_e, hv_e hold depth at jn,  zhup2_e, zhvp2_e hold extrapolated depth at jn+1/2
                   !                    ! backward interpolated depth used in spg terms at jn+1/2
-                  zhu_bck = hu_0(ji,jj) + r1_2*r1_e1e2u(ji,jj) * (  e1e2t(ji  ,jj) * zsshp2_e(ji  ,jj)    &
-                       &                                          + e1e2t(ji+1,jj) * zsshp2_e(ji+1,jj)  ) * ssumask(ji,jj)
-                  zhv_bck = hv_0(ji,jj) + r1_2*r1_e1e2v(ji,jj) * (  e1e2t(ji,jj  ) * zsshp2_e(ji,jj  )    &
-                       &                                          + e1e2t(ji,jj+1) * zsshp2_e(ji,jj+1)  ) * ssvmask(ji,jj)
-                  !                    ! inverse depth at jn+1
-                  z1_hu = ssumask(ji,jj) / ( hu_0(ji,jj) + zsshu_a(ji,jj) + 1._wp - ssumask(ji,jj) )
-                  z1_hv = ssvmask(ji,jj) / ( hv_0(ji,jj) + zsshv_a(ji,jj) + 1._wp - ssvmask(ji,jj) )
-                  !
+                  zhu_bck = r1_2 * r1_e1e2u(ji,jj) * ( e1e2t(ji  ,jj)*(ht_0(ji  ,jj) + zsshp2_e(ji  ,jj))*scaled_e3t_0_ik  (ji,jj) &
+                           &                         + e1e2t(ji+1,jj)*(ht_0(ji+1,jj) + zsshp2_e(ji+1,jj))*scaled_e3t_0_ip1k(ji,jj) &
+                           &        ) * ssumask(ji,jj) 
+
+                  zhv_bck = r1_2 * r1_e1e2v(ji,jj) * ( e1e2t(ji,jj  )*(ht_0(ji,jj  ) + zsshp2_e(ji,jj  ))*scaled_e3t_0_jk  (ji,jj) &
+                           &                         + e1e2t(ji,jj+1)*(ht_0(ji,jj+1) + zsshp2_e(ji,jj+1))*scaled_e3t_0_jp1k(ji,jj) &
+                           &        ) * ssvmask(ji,jj) 
+
+                  z1_hu = ssumask(ji,jj) / ( r1_2 * r1_e1e2u(ji,jj) *(e1e2t(ji  ,jj)*(ht_0(ji,jj)   + ssha_e(ji,jj)  )*scaled_e3t_0_ik(ji  ,jj) &
+                                            &      +e1e2t(ji+1,jj)*(ht_0(ji+1,jj) + ssha_e(ji+1,jj))*scaled_e3t_0_ip1k(ji,jj)) + 1._wp - ssumask(ji,jj) )
+
+                  z1_hv = ssvmask(ji,jj) / ( r1_2 * r1_e1e2v(ji,jj)* ( e1e2t(ji,jj  )*(ht_0(ji,jj)   + ssha_e(ji,jj)  )*scaled_e3t_0_jk(ji  ,jj) & 
+                                            &      + e1e2t(ji,jj+1)* (ht_0(ji,jj+1) + ssha_e(ji,jj+1))*scaled_e3t_0_jp1k(ji,jj)) + 1._wp - ssvmask(ji,jj) )
+
+
                   ua_e(ji,jj) = (               hu_e  (ji,jj) *   un_e (ji,jj)      & 
                        &            + rdtbt * (  zhu_bck        * zu_spg (ji,jj)  &   !
                        &                       + zhup2_e(ji,jj) * zu_trd (ji,jj)  &   !
@@ -827,9 +683,20 @@ CONTAINS
          ENDIF
        
          IF( .NOT.ln_linssh ) THEN   !* Update ocean depth (variable volume case only)
-            hu_e (2:jpim1,2:jpjm1) = hu_0(2:jpim1,2:jpjm1) + zsshu_a(2:jpim1,2:jpjm1)
+         DO jj = 1, jpjm1
+            DO ji = 1, jpim1      ! NO Vector Opt.
+               zdep_u(ji,jj) = r1_2 * r1_e1e2u(ji,jj) * ( e1e2t(ji,jj  ) * (ssha_e(ji,  jj)+ht_0(ji,  jj))*scaled_e3t_0_ik  (ji,jj) &
+                                                 &     +  e1e2t(ji+1,jj) * (ssha_e(ji+1,jj)+ht_0(ji+1,jj))*scaled_e3t_0_ip1k(ji,jj) )*ssumask(ji,jj)
+               zdep_v(ji,jj) = r1_2 * r1_e1e2v(ji,jj) * ( e1e2t(ji,jj  ) * (ssha_e(ji,  jj)+ht_0(ji,  jj))*scaled_e3t_0_jk  (ji,jj  ) &
+                                                 &     +  e1e2t(ji,jj+1) * (ssha_e(ji,jj+1)+ht_0(ji,jj+1))*scaled_e3t_0_jp1k(ji,jj) )*ssvmask(ji,jj)
+            ENDDO
+        ENDDO
+         CALL lbc_lnk_multi( 'dynspg_ts', zdep_u, 'U', -1._wp )
+         CALL lbc_lnk_multi( 'dynspg_ts', zdep_v, 'V', -1._wp )
+
+            hu_e (2:jpim1,2:jpjm1) = zdep_u(2:jpim1,2:jpjm1) 
             hur_e(2:jpim1,2:jpjm1) = ssumask(2:jpim1,2:jpjm1) / ( hu_e(2:jpim1,2:jpjm1) + 1._wp - ssumask(2:jpim1,2:jpjm1) )
-            hv_e (2:jpim1,2:jpjm1) = hv_0(2:jpim1,2:jpjm1) + zsshv_a(2:jpim1,2:jpjm1)
+            hv_e (2:jpim1,2:jpjm1) = zdep_v(2:jpim1,2:jpjm1)
             hvr_e(2:jpim1,2:jpjm1) = ssvmask(2:jpim1,2:jpjm1) / ( hv_e(2:jpim1,2:jpjm1) + 1._wp - ssvmask(2:jpim1,2:jpjm1) )
             CALL lbc_lnk_multi( 'dynspg_ts', ua_e , 'U', -1._wp, va_e , 'V', -1._wp  &
                  &                         , hu_e , 'U',  1._wp, hv_e , 'V',  1._wp  &
@@ -917,23 +784,6 @@ CONTAINS
             ua(:,:,jk) = ua(:,:,jk) + ( ua_b(:,:) - ub_b(:,:) ) * r1_2dt_b
             va(:,:,jk) = va(:,:,jk) + ( va_b(:,:) - vb_b(:,:) ) * r1_2dt_b
          END DO
-         IF( l_trddyn ) THEN
-            ztottrdu(:,:) = ( ua_b(:,:) - ub_b(:,:) ) * r1_2dt_b
-            ztottrdv(:,:) = ( va_b(:,:) - vb_b(:,:) ) * r1_2dt_b
-            CALL trd_dyn( ztottrdu, ztottrdv, jpdyn_tot, kt )
-         ENDIF
-
-!AW
-         IF( kt == nit000 ) THEN 
-            u_b_cum(:,:) = 0._wp
-            v_b_cum(:,:) = 0._wp
-         ENDIF
-         u_b_cum(:,:) = u_b_cum(:,:) + ua_b(:,:)
-         v_b_cum(:,:) = v_b_cum(:,:) + va_b(:,:)  
-         CALL iom_put( "u_baro_cum", u_b_cum )
-         CALL iom_put( "v_baro_cum", v_b_cum )
-!!AW end
-
       ELSE
          ! At this stage, ssha has been corrected: compute new depths at velocity points
          DO jj = 1, jpjm1
@@ -944,34 +794,24 @@ CONTAINS
                zsshv_a(ji,jj) = r1_2 * ssvmask(ji,jj)  * r1_e1e2v(ji,jj) &
                   &              * ( e1e2t(ji,jj  ) * ssha(ji,jj  )      &
                   &              +   e1e2t(ji,jj+1) * ssha(ji,jj+1) )
+               zdep_u(ji,jj) = r1_2 * r1_e1e2u(ji,jj) * ( e1e2t(ji,jj  ) * (ssha(ji,  jj)+ht_0(ji,  jj))*scaled_e3t_0_ik(ji  ,jj) &
+                                                 &     +  e1e2t(ji+1,jj) * (ssha(ji+1,jj)+ht_0(ji+1,jj))*scaled_e3t_0_ip1k(ji,jj) )
+               zdep_v(ji,jj) = r1_2 * r1_e1e2v(ji,jj) * ( e1e2t(ji,jj  ) * (ssha(ji,  jj)+ht_0(ji,  jj))*scaled_e3t_0_jk(ji,jj  ) &
+                                                 &     +  e1e2t(ji,jj+1) * (ssha(ji,jj+1)+ht_0(ji,jj+1))*scaled_e3t_0_jp1k(ji,jj) )
             END DO
          END DO
+         CALL lbc_lnk_multi( 'dynspg_ts', zdep_u, 'U', -1._wp )
+         CALL lbc_lnk_multi( 'dynspg_ts', zdep_v, 'V', -1._wp )
+
          CALL lbc_lnk_multi( 'dynspg_ts', zsshu_a, 'U', 1._wp, zsshv_a, 'V', 1._wp ) ! Boundary conditions
          !
          DO jk=1,jpkm1
             ua(:,:,jk) = ua(:,:,jk) + r1_hu_n(:,:) * ( ua_b(:,:) - ub_b(:,:) * hu_b(:,:) ) * r1_2dt_b
             va(:,:,jk) = va(:,:,jk) + r1_hv_n(:,:) * ( va_b(:,:) - vb_b(:,:) * hv_b(:,:) ) * r1_2dt_b
          END DO
-
-!!AW
-!      IF( kt == nit000 ) THEN 
-         u_b_cum = 0._wp
-         v_b_cum = 0._wp
-!      ENDIF
-         u_b_cum(:,:) = u_b_cum(:,:) !+ ua_b(:,:)
-         v_b_cum(:,:) = v_b_cum(:,:) !+ va_b(:,:)  
-         CALL iom_put( "u_baro_cum", u_b_cum )
-         CALL iom_put( "v_baro_cum", v_b_cum )
-!!AW end
-
          ! Save barotropic velocities not transport:
-         ua_b(:,:) =  ua_b(:,:) / ( hu_0(:,:) + zsshu_a(:,:) + 1._wp - ssumask(:,:) )
-         va_b(:,:) =  va_b(:,:) / ( hv_0(:,:) + zsshv_a(:,:) + 1._wp - ssvmask(:,:) )
-         IF( l_trddyn ) THEN
-            ztottrdu(:,:) = r1_hu_n(:,:) * ( ua_b(:,:) - ub_b(:,:) * hu_b(:,:) ) * r1_2dt_b
-            ztottrdv(:,:) = r1_hv_n(:,:) * ( va_b(:,:) - vb_b(:,:) * hv_b(:,:) ) * r1_2dt_b
-            CALL trd_dyn( ztottrdu, ztottrdv, jpdyn_tot, kt )
-         ENDIF
+         ua_b(:,:) =  ua_b(:,:) / ( zdep_u(:,:) + 1._wp - ssumask(:,:) )
+         va_b(:,:) =  va_b(:,:) / ( zdep_v(:,:) + 1._wp - ssvmask(:,:) )
       ENDIF
 
 
@@ -992,6 +832,7 @@ CONTAINS
          END DO
       END IF 
 
+      
       CALL iom_put(  "ubar", un_adv(:,:)*r1_hu_n(:,:) )    ! barotropic i-current
       CALL iom_put(  "vbar", vn_adv(:,:)*r1_hv_n(:,:) )    ! barotropic i-current
       !
@@ -1016,21 +857,8 @@ CONTAINS
       IF( ln_wd_il )   DEALLOCATE( zcpx, zcpy )
       IF( ln_wd_dl )   DEALLOCATE( ztwdmask, zuwdmask, zvwdmask, zuwdav2, zvwdav2 )
       !
-      IF( l_trddyn ) THEN
-         CALL trd_dyn( zspgtrdu, zspgtrdv, jpdyn_spg, kt )
-         CALL trd_dyn( zpvotrdu, zpvotrdv, jpdyn_pvo, kt )
-         CALL trd_dyn( zbfrtrdu, zbfrtrdv, jpdyn_bfr, kt )
-         DEALLOCATE( zspgtrdu, zspgtrdv, zpvotrdu, zpvotrdv, ztautrdu, ztautrdv, zbfrtrdu, zbfrtrdv )
-!AW
-         IF( ln_isfcav ) THEN
-!         IF( ln_isfcav.OR.ln_drgice_imp ) THEN          ! top+bottom friction (ocean cavities)
-            CALL trd_dyn( ztfrtrdu, ztfrtrdv, jpdyn_tfr, kt )
-            DEALLOCATE( ztfrtrdu, ztfrtrdv )
-         ENDIF
-      ENDIF
-      !
-      CALL iom_put( "baro_u" , un_b*ssumask(:,:)+zmdi*(1.-ssumask(:,:) ) )  ! Barotropic  U Velocity
-      CALL iom_put( "baro_v" , vn_b*ssvmask(:,:)+zmdi*(1.-ssvmask(:,:) ) )  ! Barotropic  V Velocity
+      CALL iom_put( "baro_u" , un_b )  ! Barotropic  U Velocity
+      CALL iom_put( "baro_v" , vn_b )  ! Barotropic  V Velocity
       !
    END SUBROUTINE dyn_spg_ts
 
@@ -1639,8 +1467,7 @@ CONTAINS
      
 
 
-   SUBROUTINE dyn_drg_init( pu_RHSi, pv_RHSi, pCdU_u, pCdU_v, &
-              &             ptfrtrdu, ptfrtrdv, pbfrtrdu, pbfrtrdv )
+   SUBROUTINE dyn_drg_init( pu_RHSi, pv_RHSi, pCdU_u, pCdU_v )
       !!----------------------------------------------------------------------
       !!                  ***  ROUTINE dyn_drg_init  ***
       !!                    
@@ -1652,8 +1479,6 @@ CONTAINS
       !!----------------------------------------------------------------------
       REAL(wp), DIMENSION(jpi,jpj), INTENT(inout) ::   pu_RHSi, pv_RHSi   ! baroclinic part of the barotropic RHS
       REAL(wp), DIMENSION(jpi,jpj), INTENT(  out) ::   pCdU_u , pCdU_v    ! barotropic drag coefficients
-      REAL(wp), DIMENSION(jpi,jpj), INTENT(inout), OPTIONAL :: ptfrtrdu, ptfrtrdv ! top friction trends
-      REAL(wp), DIMENSION(jpi,jpj), INTENT(inout), OPTIONAL :: pbfrtrdu, pbfrtrdv ! bottom friction trends
       !
       INTEGER  ::   ji, jj   ! dummy loop indices
       INTEGER  ::   ikbu, ikbv, iktu, iktv
@@ -1663,9 +1488,7 @@ CONTAINS
       !
       !                    !==  Set the barotropic drag coef.  ==!
       !
-! AW that was a 4.0.2 -> 4.0.4 change
-      IF( ln_isfcav ) THEN          ! top+bottom friction (ocean cavities)
-!      IF( ln_isfcav.OR.ln_drgice_imp ) THEN          ! top+bottom friction (ocean cavities)
+      IF( ln_isfcav.OR.ln_drgice_imp ) THEN          ! top+bottom friction (ocean cavities)
          
          DO jj = 2, jpjm1
             DO ji = 2, jpim1     ! INNER domain
@@ -1683,11 +1506,6 @@ CONTAINS
       ENDIF
       !
       !                    !==  BOTTOM stress contribution from baroclinic velocities  ==!
-      !
-      IF( l_trddyn ) THEN
-           pbfrtrdu(:,:) = pu_RHSi(:,:)
-           pbfrtrdv(:,:) = pv_RHSi(:,:)
-      ENDIF
       !
       IF( ln_bt_fw ) THEN                 ! FORWARD integration: use NOW bottom baroclinic velocities
          
@@ -1731,21 +1549,9 @@ CONTAINS
          END DO
       END IF
       !
-      IF( l_trddyn ) THEN
-         pbfrtrdu(:,:) = pu_RHSi(:,:) - pbfrtrdu(:,:) 
-         pbfrtrdv(:,:) = pv_RHSi(:,:) - pbfrtrdv(:,:) 
-      ENDIF
-      !
       !                    !==  TOP stress contribution from baroclinic velocities  ==!   (no W/D case)
       !
-!AW this was a 4.0.2 -> 4.0.4 change
-      IF( ln_isfcav ) THEN
-!      IF( ln_isfcav.OR.ln_drgice_imp ) THEN
-         !
-         IF( l_trddyn ) THEN
-            ptfrtrdu(:,:) = pu_RHSi(:,:)
-            ptfrtrdv(:,:) = pv_RHSi(:,:)
-         ENDIF
+      IF( ln_isfcav.OR.ln_drgice_imp ) THEN
          !
          IF( ln_bt_fw ) THEN                ! FORWARD integration: use NOW top baroclinic velocity
             
@@ -1777,11 +1583,6 @@ CONTAINS
                pv_RHSi(ji,jj) = pv_RHSi(ji,jj) + r1_hv_n(ji,jj) * r1_2*( rCdU_top(ji,jj+1)+rCdU_top(ji,jj) ) * zv_i(ji,jj)
             END DO
          END DO
-         !
-         IF( l_trddyn ) THEN
-            ptfrtrdu(:,:) = pu_RHSi(:,:) - ptfrtrdu(:,:) 
-            ptfrtrdv(:,:) = pv_RHSi(:,:) - ptfrtrdv(:,:)
-         ENDIF
          !
       ENDIF
       !

@@ -79,13 +79,11 @@ MODULE step_oce
    USE diahth          ! thermocline depth                (dia_hth routine)
    USE diahsb          ! heat, salt and volume budgets    (dia_hsb routine)
    USE diaharm
+   USE diaprod
    USE diacfl
    USE diaobs          ! Observation operator
    USE flo_oce         ! floats variables
    USE floats          ! floats computation               (flo_stp routine)
-!AW_DS
-   USE trd_oce, ONLY: l_trddyn
-!AW_DS_end
 
    USE crsfld          ! Standard output on coarse grid   (crs_fld routine)
 
@@ -113,7 +111,7 @@ MODULE step_oce
 #endif
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
-   !! $Id: step_oce.F90 10068 2018-08-28 14:09:04Z nicolasmartin $
+   !! $Id$
    !! Software governed by the CeCILL license (see ./LICENSE)
    !!======================================================================
 END MODULE step_oce

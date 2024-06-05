@@ -48,7 +48,7 @@ MODULE diawri
    USE dia25h         ! 25h Mean output
    USE iom            ! 
    USE ioipsl         ! 
-
+   USE eosbn2
 #if defined key_si3
    USE ice 
    USE icewri 
@@ -79,7 +79,7 @@ MODULE diawri
 #  include "vectopt_loop_substitute.h90"
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
-   !! $Id: diawri.F90 12206 2019-12-12 11:14:55Z smasson $
+   !! $Id$
    !! Software governed by the CeCILL license (see ./LICENSE)
    !!----------------------------------------------------------------------
 CONTAINS
@@ -112,12 +112,31 @@ CONTAINS
       REAL(wp)::   zztmp2, zztmpy   !   -      -
       REAL(wp), DIMENSION(jpi,jpj)     ::   z2d   ! 2D workspace
       REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d   ! 3D workspace
-      REAL(wp), DIMENSION(jpi,jpj) ::   zhdiv   ! 2D workspace
-      REAL(wp), DIMENSION(jpi,jpj) ::   zUoce
-      REAL(wp), DIMENSION(jpi,jpj) ::   zVoce
-      REAL(wp)::   zN, zi
+      CHARACTER(len=4),SAVE :: ttype , stype           ! temperature and salinity type
       !!----------------------------------------------------------------------
       ! 
+      IF( kt == nit000 ) THEN
+         IF( ln_TEOS10 ) THEN
+            IF ( iom_use("toce_pot") .OR. iom_use("soce_pra") .OR. iom_use("sst_pot") .OR. iom_use("sss_pra") &
+                  & .OR. iom_use("sbt_pot") .OR. iom_use("sbs_pra") .OR. iom_use("sstgrad_pot") .OR. iom_use("sstgrad2_pot") &
+                  & .OR. iom_use("tosmint_pot") .OR. iom_use("somint_pra"))  THEN 
+               CALL ctl_stop( 'diawri: potential temperature and practical salinity not available with ln_TEOS10' )
+            ELSE
+               ttype='con' ; stype='abs'   ! teos-10 using conservative temperature and absolute salinity
+            ENDIF 
+         ELSE IF( ln_EOS80  ) THEN
+            IF ( iom_use("toce_con") .OR. iom_use("soce_abs") .OR. iom_use("sst_con") .OR. iom_use("sss_abs") &
+                  & .OR. iom_use("sbt_con") .OR. iom_use("sbs_abs") .OR. iom_use("sstgrad_con") .OR. iom_use("sstgrad2_con") &
+                  & .OR. iom_use("tosmint_con") .OR. iom_use("somint_abs"))  THEN 
+               CALL ctl_stop( 'diawri: conservative temperature and absolute salinity not available with ln_EOS80' )
+            ELSE
+               ttype='pot' ; stype='pra'   ! eos-80 using potential temperature and practical salinity
+            ENDIF
+         ELSE IF ( ln_SEOS) THEN
+            ttype='seos' ; stype='seos' ! seos using Simplified Equation of state
+         ENDIF
+      ENDIF
+
       IF( ln_timing )   CALL timing_start('dia_wri')
       ! 
       ! Output the initial state and forcings
@@ -142,37 +161,36 @@ CONTAINS
          CALL iom_put( "ssh" , (sshn+ssh_ref)*tmask(:,:,1) )   ! sea surface height (brought back to the reference used for wetting and drying)
       ELSE
          CALL iom_put( "ssh" , sshn )              ! sea surface height
-!!AW
-         CALL iom_put( "sshdt" , ((sshn-sshb) / rdt)*tmask(:,:,1) ) !time derivative of ssh
-!!AW end
       ENDIF
 
       IF( iom_use("wetdep") )   &                  ! wet depth
          CALL iom_put( "wetdep" , ht_0(:,:) + sshn(:,:) )
       
-      CALL iom_put( "toce", tsn(:,:,:,jp_tem) )    ! 3D temperature
-      CALL iom_put(  "sst", tsn(:,:,1,jp_tem) )    ! surface temperature
-      IF ( iom_use("sbt") ) THEN
+      CALL iom_put( "toce_"//ttype, tsn(:,:,:,jp_tem) )    ! 3D temperature
+      CALL iom_put(  "sst_"//ttype, tsn(:,:,1,jp_tem) )    ! surface temperature
+      IF ( iom_use("sbt_"//ttype) ) THEN
          DO jj = 1, jpj
             DO ji = 1, jpi
                ikbot = mbkt(ji,jj)
                z2d(ji,jj) = tsn(ji,jj,ikbot,jp_tem)
             END DO
          END DO
-         CALL iom_put( "sbt", z2d )                ! bottom temperature
+         CALL iom_put( "sbt_"//ttype, z2d )                ! bottom temperature
       ENDIF
       
-      CALL iom_put( "soce", tsn(:,:,:,jp_sal) )    ! 3D salinity
-      CALL iom_put(  "sss", tsn(:,:,1,jp_sal) )    ! surface salinity
-      IF ( iom_use("sbs") ) THEN
+      CALL iom_put( "soce_"//stype, tsn(:,:,:,jp_sal) )    ! 3D salinity
+      CALL iom_put(  "sss_"//stype, tsn(:,:,1,jp_sal) )    ! surface salinity
+      IF ( iom_use("sbs_"//stype) ) THEN
          DO jj = 1, jpj
             DO ji = 1, jpi
                ikbot = mbkt(ji,jj)
                z2d(ji,jj) = tsn(ji,jj,ikbot,jp_sal)
             END DO
          END DO
-         CALL iom_put( "sbs", z2d )                ! bottom salinity
+         CALL iom_put( "sbs_"//stype, z2d )                ! bottom salinity
       ENDIF
+
+      CALL iom_put( "rhop", rhop(:,:,:) )          ! 3D potential density (sigma0)
 
       IF ( iom_use("taubot") ) THEN                ! bottom stress
          zztmp = rau0 * 0.25
@@ -192,34 +210,6 @@ CONTAINS
       ENDIF
          
       CALL iom_put( "uoce", un(:,:,:) )            ! 3D i-current
-!AW
-      zUoce(:,:) = 0._wp
-      DO jk = 1, jpkm1                                 ! Horizontal divergence of barotropic transports
-        zUoce(:,:) = zUoce(:,:) + e3u_n(:,:,jk) * un(:,:,jk) * umask(:,:,jk)
-      END DO
-      CALL iom_put( "Uoce", rdt * zUoce )
-      ! ( N + 1 - i ) / N
-      ! N = number of time steps in current month
-      ! i = current time step in month
-!      zN = 1440._wp !just for testing
-      zN = ( ( 24. * 60. * 60. ) / rdt ) * nmonth_len( nmonth )
-      zi = nsec_month / rdt + 0.5_wp
-!      IF( zi < 0.4 ) THEN
-!         zUoce(:,:) = 0._wp
-!      ENDIF
-      !This is temporary
-!      IF( zi > 1440._wp ) THEN
-!         IF( zi < 2881._wp ) THEN
-!            zi = zi - 1440._wp
-!         ELSE IF ( zi < 4321._wp ) THEN
-!            zi = zi - 2880._wp
-!         ELSE
-!            zi = zi - 4320
-!         ENDIF
-!      ENDIF
-      CALL iom_put( "Uoce_weighted", ( ( ( zN + 1._wp - zi ) / zN ) * rdt ) * zUoce )
-!AW end
-
       CALL iom_put(  "ssu", un(:,:,1) )            ! surface i-current
       IF ( iom_use("sbu") ) THEN
          DO jj = 1, jpj
@@ -232,34 +222,6 @@ CONTAINS
       ENDIF
       
       CALL iom_put( "voce", vn(:,:,:) )            ! 3D j-current
-!AW
-      zVoce(:,:) = 0._wp
-      DO jk = 1, jpkm1                                 ! Horizontal divergence of barotropic transports
-        zVoce(:,:) = zVoce(:,:) + e3v_n(:,:,jk) * vn(:,:,jk) * vmask(:,:,jk)
-      END DO
-      CALL iom_put( "Voce", rdt * zVoce )
-      ! ( N + 1 - i ) / N
-      ! N = number of time steps in current month
-      ! i = current time step in month
-      zN = ( ( 24. * 60. * 60. ) / rdt ) * nmonth_len( nmonth )
-!      zN = 1440._wp !288._wp * nmonth_len( nmonth )
-      zi = nsec_month / rdt + 0.5_wp
-      !IF( zi < 0.4 ) THEN
-      !   zVoce(:,:) = 0._wp
-      !ENDIF
-      !This is temporary
-!      IF( zi > 1440._wp ) THEN
-!         IF( zi < 2881._wp ) THEN
-!            zi = zi - 1440._wp
-!         ELSE IF ( zi < 4321._wp ) THEN
-!            zi = zi - 2880._wp
-!         ELSE
-!            zi = zi - 4320
-!         ENDIF
-!      ENDIF
-      CALL iom_put( "Voce_weighted", ( ( ( zN + 1._wp - zi ) / zN ) * rdt ) * zVoce )
-!AW end
-
       CALL iom_put(  "ssv", vn(:,:,1) )            ! surface j-current
       IF ( iom_use("sbv") ) THEN
          DO jj = 1, jpj
@@ -293,7 +255,7 @@ CONTAINS
       IF( iom_use('logavt') )   CALL iom_put( "logavt", LOG( MAX( 1.e-20_wp, avt(:,:,:) ) ) )
       IF( iom_use('logavs') )   CALL iom_put( "logavs", LOG( MAX( 1.e-20_wp, avs(:,:,:) ) ) )
 
-      IF ( iom_use("sstgrad") .OR. iom_use("sstgrad2") ) THEN
+      IF ( iom_use("sstgrad_"//ttype) .OR. iom_use("sstgrad2_"//ttype) ) THEN
          DO jj = 2, jpjm1                                    ! sst gradient
             DO ji = fs_2, fs_jpim1   ! vector opt.
                zztmp  = tsn(ji,jj,1,jp_tem)
@@ -304,9 +266,9 @@ CONTAINS
             END DO
          END DO
          CALL lbc_lnk( 'diawri', z2d, 'T', 1. )
-         CALL iom_put( "sstgrad2",  z2d )          ! square of module of sst gradient
+         CALL iom_put( "sstgrad2_"//ttype,  z2d )          ! square of module of sst gradient
          z2d(:,:) = SQRT( z2d(:,:) )
-         CALL iom_put( "sstgrad" ,  z2d )          ! module of sst gradient
+         CALL iom_put( "sstgrad_"//ttype ,  z2d )          ! module of sst gradient
       ENDIF
          
       ! heat and salt contents
@@ -353,49 +315,6 @@ CONTAINS
       !
       CALL iom_put( "hdiv", hdivn )                  ! Horizontal divergence
       !
-!!AW
-      zhdiv(:,:) = 0._wp
-      DO jk = 1, jpkm1                                 ! Horizontal divergence of barotropic transports
-        zhdiv(:,:) = zhdiv(:,:) + e3t_n(:,:,jk) * hdivn(:,:,jk) * tmask(:,:,jk)
-      END DO
-      CALL iom_put( "hdiv_baro", zhdiv )
-      
-      ! ( N + 1 - i ) / N
-      ! N = number of time steps in current month
-      ! i = current time step in month
-      zN = ( ( 24. * 60. * 60. ) / rdt ) * nmonth_len( nmonth )
-!      zN = 1440._wp !288._wp * nmonth_len( nmonth )
-      zi = nsec_month / rdt + 0.5_wp
-      !IF( zi < 0.4 ) THEN
-      !   zhdiv(:,:) = 0._wp
-      !ENDIF
-      !This is temporary
-!      IF( zi > 1440._wp ) THEN
-!         IF( zi < 2881._wp ) THEN
-!            zi = zi - 1440._wp
-!         ELSE IF ( zi < 4321._wp ) THEN
-!            zi = zi - 2880._wp
-!         ELSE
-!            zi = zi - 4320
-!         ENDIF
-!      ENDIF
-            
-      CALL iom_put( "hdiv_baro_weighted", ( ( ( zN + 1._wp - zi ) / zN ) * rdt ) * zhdiv )
-      IF(lwp) WRITE(numout,*) '      zN: ',zN
-      IF(lwp) WRITE(numout,*) '      zi: ',zi
-!!AW END
-
-!!AW
-!      IF( kt == nit000 ) THEN
-!         u_b_cum = 0._wp
-!         v_b_cum = 0._wp
-!      ENDIF
-!      u_b_cum = u_b_cum + un_b
-!      v_b_cum = v_b_cum + vn_b
-!      CALL iom_put( "u_baro_cum", u_b_cum )
-!      CALL iom_put( "v_baro_cum", v_b_cum )
-!!AW end
-
       IF( iom_use("u_masstr") .OR. iom_use("u_masstr_vint") .OR. iom_use("u_heattr") .OR. iom_use("u_salttr") ) THEN
          z3d(:,:,jpk) = 0.e0
          z2d(:,:) = 0.e0
@@ -468,7 +387,7 @@ CONTAINS
          CALL iom_put( "v_salttr", 0.5 * z2d )        !  heat transport in j-direction
       ENDIF
 
-      IF( iom_use("tosmint") ) THEN
+      IF( iom_use("tosmint_"//ttype) ) THEN
          z2d(:,:) = 0._wp
          DO jk = 1, jpkm1
             DO jj = 2, jpjm1
@@ -478,9 +397,9 @@ CONTAINS
             END DO
          END DO
          CALL lbc_lnk( 'diawri', z2d, 'T', -1. )
-         CALL iom_put( "tosmint", rau0 * z2d )        ! Vertical integral of temperature
+         CALL iom_put( "tosmint_"//ttype, rau0 * z2d )        ! Vertical integral of temperature
       ENDIF
-      IF( iom_use("somint") ) THEN
+      IF( iom_use("somint_"//stype) ) THEN
          z2d(:,:)=0._wp
          DO jk = 1, jpkm1
             DO jj = 2, jpjm1
@@ -490,7 +409,7 @@ CONTAINS
             END DO
          END DO
          CALL lbc_lnk( 'diawri', z2d, 'T', -1. )
-         CALL iom_put( "somint", rau0 * z2d )         ! Vertical integral of salinity
+         CALL iom_put( "somint_"//stype, rau0 * z2d )         ! Vertical integral of salinity
       ENDIF
 
       CALL iom_put( "bn2", rn2 )                      ! Brunt-Vaisala buoyancy frequency (N^2)
@@ -511,13 +430,18 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER, DIMENSION(2) :: ierr
       !!----------------------------------------------------------------------
-      ierr = 0
-      ALLOCATE( ndex_hT(jpi*jpj) , ndex_T(jpi*jpj*jpk) ,     &
-         &      ndex_hU(jpi*jpj) , ndex_U(jpi*jpj*jpk) ,     &
-         &      ndex_hV(jpi*jpj) , ndex_V(jpi*jpj*jpk) , STAT=ierr(1) )
+      IF( nn_write == -1 ) THEN
+         dia_wri_alloc = 0
+      ELSE    
+         ierr = 0
+         ALLOCATE( ndex_hT(jpi*jpj) , ndex_T(jpi*jpj*jpk) ,     &
+            &      ndex_hU(jpi*jpj) , ndex_U(jpi*jpj*jpk) ,     &
+            &      ndex_hV(jpi*jpj) , ndex_V(jpi*jpj*jpk) , STAT=ierr(1) )
          !
-      dia_wri_alloc = MAXVAL(ierr)
-      CALL mpp_sum( 'diawri', dia_wri_alloc )
+         dia_wri_alloc = MAXVAL(ierr)
+         CALL mpp_sum( 'diawri', dia_wri_alloc )
+         !
+      ENDIF
       !
    END FUNCTION dia_wri_alloc
 
@@ -1028,7 +952,6 @@ CONTAINS
          CALL iom_rstput( 0, 0, inum, 'sdmecrty', vsd            )    ! now StokesDrift j-velocity
          CALL iom_rstput( 0, 0, inum, 'sdvecrtz', wsd            )    ! now StokesDrift k-velocity
       ENDIF
- 
 #if defined key_si3
       IF( nn_ice == 2 ) THEN   ! condition needed in case agrif + ice-model but no-ice in child grid
          CALL ice_wri_state( inum )
