@@ -104,15 +104,14 @@
 !-----------------------------------------------------------------------
    !                       ! =T  read T-S fields for:
    ln_tsd_init = .false.         !  ocean initialisation
-!   ln_tsd_interp = .true.          !  Interpolation of T & S in the verticalinput data (T) or not (F)
    ln_tsd_dmp  = .false.         !  T-S restoring   (see namtra_dmp)
       
    cn_dir      = './'      !  root directory for the T-S data location
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   sn_tem = 'data_1m_potential_temperature_nomask',  -1.     , 'votemper',   .true.    , .true. , 'yearly'  ,    ''            ,    ''    ,    ''
-   sn_sal = 'data_1m_salinity_nomask'             ,  -1.     , 'vosaline',   .true.    , .true. , 'yearly'  ,    ''            ,    ''    ,    ''
+!   sn_tem = 'data_1m_potential_temperature_nomask',  -1.     , 'votemper',   .true.    , .true. , 'yearly'  ,    ''            ,    ''    ,    ''
+!   sn_sal = 'data_1m_salinity_nomask'             ,  -1.     , 'vosaline',   .true.    , .true. , 'yearly'  ,    ''            ,    ''    ,    ''
 !   sn_dep      = 'inits_fake',                     -1.,         'deptht',   .false.    , .true. , 'monthly'  ,    ''            , ''       ,    ''
 !   sn_msk      = 'inits_fake',                     -1.,           'mask',   .false.    , .true. , 'monthly'  ,    ''            , ''       ,    ''
 !   nn_tsd_zone = 1
@@ -196,12 +195,12 @@
 !-----------------------------------------------------------------------
 &namsbc        !   Surface Boundary Condition manager                   (default: NO selection)
 !-----------------------------------------------------------------------
-   nn_fsbc     = 2         !  frequency of SBC module call
+   nn_fsbc     = 1         !  frequency of SBC module call
       !                    !  (control sea-ice & iceberg model call)
                      ! Type of air-sea fluxes 
    ln_usr      = .false.   !  user defined formulation                  (T => check usrdef_sbc)
    ln_flx      = .false.   !  flux formulation                          (T => fill namsbc_flx )
-   ln_blk      = .false.   !  Bulk formulation                          (T => fill namsbc_blk )
+   ln_blk      = .true.   !  Bulk formulation                          (T => fill namsbc_blk )
       !              ! Type of coupling (Ocean/Ice/Atmosphere) :
    ln_cpl      = .false.   !  atmosphere coupled   formulation          ( requires key_oasis3 )
    ln_mixcpl   = .false.   !  forced-coupled mixed formulation          ( requires key_oasis3 )
@@ -217,14 +216,14 @@
    ln_ice_embd = .false.   !  =T embedded sea-ice (pressure + mass and salt exchanges)
       !                    !  =F levitating ice (no pressure, mass and salt exchanges)
                      ! Misc. options of sbc : 
-   ln_traqsr   = .false.   !  Light penetration in the ocean            (T => fill namtra_qsr)
+   ln_traqsr   = .true.   !  Light penetration in the ocean            (T => fill namtra_qsr)
    ln_dm2dc    = .false.   !  daily mean to diurnal cycle on short wave
    ln_ssr      = .false.   !  Sea Surface Restoring on T and/or S       (T => fill namsbc_ssr)
    nn_fwb      = 0         !  FreshWater Budget: =0 unchecked
       !                    !     =1 global mean of e-p-r set to zero at each time step
       !                    !     =2 annual global mean of e-p-r set to zero
-   ln_rnf      = .false.   !  runoffs                                   (T => fill namsbc_rnf)
-   ln_apr_dyn  = .false.   !  Patm gradient added in ocean & ice Eqs.   (T => fill namsbc_apr )
+   ln_rnf      = .true.   !  runoffs                                   (T => fill namsbc_rnf)
+   ln_apr_dyn  = .true.   !  Patm gradient added in ocean & ice Eqs.   (T => fill namsbc_apr )
    ln_isf      = .false.   !  ice shelf                                 (T   => fill namsbc_isf & namsbc_iscpl)
    ln_wave     = .false.   !  Activate coupling with wave  (T => fill namsbc_wave)
    ln_cdgw     = .false.   !  Neutral drag coefficient read from wave model (T => ln_wave=.true. & fill namsbc_wave)
@@ -259,7 +258,7 @@
    ln_NCAR     = .false.   ! "NCAR"      algorithm   (Large and Yeager 2008)
    ln_COARE_3p0 = .false.   ! "COARE 3.0" algorithm   (Fairall et al. 2003)
    ln_COARE_3p5 = .false.   ! "COARE 3.5" algorithm   (Edson et al. 2013)
-   ln_ECMWF    = .false.   ! "ECMWF"     algorithm   (IFS cycle 31)
+   ln_ECMWF    = .true.   ! "ECMWF"     algorithm   (IFS cycle 31)
       !
       rn_zqt      = 10.       !  Air temperature & humidity reference height (m)
       rn_zu       = 10.       !  Wind vector reference height (m)
@@ -284,7 +283,7 @@
    sn_prec     = 'ncar_precip.15JUNE2009_fill',   -1.        , 'PRC_MOD1',   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
    sn_snow     = 'ncar_precip.15JUNE2009_fill',   -1.        , 'SNOW'    ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
    sn_slp      = 'slp.15JUNE2009_fill'        ,    6.        , 'SLP'     ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
-   sn_tdif     = 'taudif_core'                ,   24         , 'taudif'  ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
+!   sn_tdif     = 'taudif_core'                ,   24         , 'taudif'  ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
 /
 !-----------------------------------------------------------------------
 &namsbc_cpl    !   coupled ocean/atmosphere model                       ("key_oasis3")
@@ -377,7 +376,7 @@
    rn_abs      =   0.58       !  RGB & 2BD: fraction absorbed in the very near surface
    rn_si0      =   0.35       !  RGB & 2BD: shortess depth of extinction
    nn_chldta   =      0       !  RGB : Chl data (=1) or cst value (=0)
-   rn_si1      =   23.0       !  2BD : longest depth of extinction
+   !rn_si1      =   23.0       !  2BD : longest depth of extinction
    
    cn_dir      = './'      !  root directory for the chlorophyl data location
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
