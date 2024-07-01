@@ -35,19 +35,19 @@
 !-----------------------------------------------------------------------
    nn_no       =       0   !  Assimilation cycle index
    cn_exp      =  "CO9_p2_AMM7"
-   nn_it000    =  1 ! 16993 !  8641 ! 1   !  first time step
-   nn_itend    =  864 !8640 !210240 !52128 !16992 !25920   ! 288 per 24hr   !  last  time step 
+   nn_it000    =  8641 ! 16993 !  8641 ! 1   !  first time step
+   nn_itend    =  9505 !8640 !210240 !52128 !16992 !25920   ! 288 per 24hr   !  last  time step 
    nn_date0    =  20050101   !  date at nit_0000 (format yyyymmdd) used if ln_rstart=F or (ln_rstart=T and nn_rstctl=0 or 1)
    nn_time0    =       0   !  initial time of day in hhmm
    nn_leapy    =       1   !  Leap year calendar (1) or not (0)
-   ln_rstart   =  .false.   !  start from rest (F) or from a restart file (T)
+   ln_rstart   =  .true.   !  start from rest (F) or from a restart file (T)
       nn_euler    =    1     !  = 0 : start with forward time step if ln_rstart=T
       nn_rstctl   =    2     !  restart control ==> activated only if ln_rstart=T
       !                          !    = 0 nn_date0 read in namelist ; nn_it000 : read in namelist
       !                          !    = 1 nn_date0 read in namelist ; nn_it000 : check consistancy between namelist and restart
       !                          !    = 2 nn_date0 read in restart  ; nn_it000 : check consistancy between namelist and restart
-      cn_ocerst_in    = "MEs_L51_r10-07_opt_v2_01051776_restart"   !  suffix of ocean restart name (input)
-      cn_ocerst_indir = "/work/n01/n01/anwise/NEMO/VC_4.0.2/MODEL/nemo/cfgs/AMM7/ENSEMBLE_MEMBERS/MEs_L51_r10-07_opt_v2/RESTARTS/"         !  directory from which to read input ocean restarts
+      cn_ocerst_in    = "CO9_p2_AMM7_00008640_restart"   !  suffix of ocean restart name (input)
+      cn_ocerst_indir = "./RESTARTS"         !  directory from which to read input ocean restarts
       cn_ocerst_out   = "restart"   !  suffix of ocean restart name (output)
       cn_ocerst_outdir = "./RESTARTS"        !  directory in which to write output ocean restarts
    ln_iscpl    = .false.   !  cavity evolution forcing or coupling to ice sheet model
@@ -162,14 +162,14 @@
    ln_ice_embd = .false.   !  =T embedded sea-ice (pressure + mass and salt exchanges)
       !                    !  =F levitating ice (no pressure, mass and salt exchanges)
                      ! Misc. options of sbc : 
-   ln_traqsr   = .false.   !  Light penetration in the ocean            (T => fill namtra_qsr)
+   ln_traqsr   = .true.   !  Light penetration in the ocean            (T => fill namtra_qsr)
    ln_dm2dc    = .false.   !  daily mean to diurnal cycle on short wave
    ln_ssr      = .false.   !  Sea Surface Restoring on T and/or S       (T => fill namsbc_ssr)
    nn_fwb      = 0         !  FreshWater Budget: =0 unchecked
       !                    !     =1 global mean of e-p-r set to zero at each time step
       !                    !     =2 annual global mean of e-p-r set to zero
    ln_rnf      = .true.   !  runoffs                                   (T => fill namsbc_rnf)
-   ln_apr_dyn  = .false.    !  Patm gradient added in ocean & ice Eqs.   (T => fill namsbc_apr )
+   ln_apr_dyn  = .true.    !  Patm gradient added in ocean & ice Eqs.   (T => fill namsbc_apr )
    ln_isf      = .false.   !  ice shelf                                 (T   => fill namsbc_isf & namsbc_iscpl)
    ln_wave     = .false.   !  Activate coupling with wave  (T => fill namsbc_wave)
    ln_cdgw     = .false.   !  Neutral drag coefficient read from wave model (T => ln_wave=.true. & fill namsbc_wave)
@@ -190,8 +190,8 @@
    !                    !  bulk algorithm :
    ln_NCAR     = .false.   ! "NCAR"      algorithm   (Large and Yeager 2008)
    ln_COARE_3p0 = .false.   ! "COARE 3.0" algorithm   (Fairall et al. 2003)
-   ln_COARE_3p5 = .true.   ! "COARE 3.5" algorithm   (Edson et al. 2013)
-   ln_ECMWF    = .false.   ! "ECMWF"     algorithm   (IFS cycle 31)
+   ln_COARE_3p5 = .false.   ! "COARE 3.5" algorithm   (Edson et al. 2013)
+   ln_ECMWF    = .true.   ! "ECMWF"     algorithm   (IFS cycle 31)
       !
       rn_zqt      = 2.       !  Air temperature & humidity reference height (m)
       rn_zu       = 10.       !  Wind vector reference height (m)
@@ -209,15 +209,15 @@
    !___________!_________________________!___________________!___________!_____________!________!___________!______________________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename             ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                              ! pairing  !    filename   !
-   sn_humi     =   'ERA5_SPH'            ,        1          ,   'SPH'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,    ''    ,   'ERA5_LSM'
-   sn_prec     =   'ERA5_MTPR'           ,        1          ,  'MTPR'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,    ''    ,   'ERA5_LSM'
-   sn_qlw      =   'ERA5_MSDWLWRF'       ,        1          , 'MSDWLWRF',    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,    ''    ,   'ERA5_LSM'
-   sn_qsr      =   'ERA5_MSDWSWRF'       ,        1          , 'MSDWSWRF',    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,    ''    ,   'ERA5_LSM'
-   sn_snow     =   'ERA5_MSR'            ,        1          ,   'MSR'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,    ''    ,   'ERA5_LSM'
-   sn_tair     =   'ERA5_T2M'            ,        1          ,   'T2M'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,    ''    ,   'ERA5_LSM'
-   sn_wndi     =   'ERA5_U10'            ,        1          ,   'U10'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,  'Uwnd'  ,   'ERA5_LSM'
-   sn_wndj     =   'ERA5_V10'            ,        1          ,   'V10'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,  'Vwnd'  ,   'ERA5_LSM'
-   sn_slp      =   'ERA5_MSL'            ,        1          ,   'MSL'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bilin.nc'   ,    ''    ,   'ERA5_LSM'
+   sn_humi     =   'ERA5_SPH'            ,        1          ,   'SPH'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,    ''    ,   'ERA5_LSM'
+   sn_prec     =   'ERA5_MTPR'           ,        1          ,  'MTPR'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,    ''    ,   'ERA5_LSM'
+   sn_qlw      =   'ERA5_MSDWLWRF'       ,        1          , 'MSDWLWRF',    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,    ''    ,   'ERA5_LSM'
+   sn_qsr      =   'ERA5_MSDWSWRF'       ,        1          , 'MSDWSWRF',    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,    ''    ,   'ERA5_LSM'
+   sn_snow     =   'ERA5_MSR'            ,        1          ,   'MSR'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,    ''    ,   'ERA5_LSM'
+   sn_tair     =   'ERA5_T2M'            ,        1          ,   'T2M'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,    ''    ,   'ERA5_LSM'
+   sn_wndi     =   'ERA5_U10'            ,        1          ,   'U10'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,  'Uwnd'  ,   'ERA5_LSM'
+   sn_wndj     =   'ERA5_V10'            ,        1          ,   'V10'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,  'Vwnd'  ,   'ERA5_LSM'
+   sn_slp      =   'ERA5_MSL'            ,        1          ,   'MSL'   ,    .true.   , .false.,  'yearly' ,  'weights_era5_bicubic.nc'   ,    ''    ,   'ERA5_LSM'
 /
 !-----------------------------------------------------------------------
 &namtra_qsr    !   penetrative solar radiation                          (ln_traqsr =T)
@@ -287,7 +287,7 @@
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   sn_apr      = 'ERA5_MSL'              ,          1        ,    'MSL'  ,    .true.   , .false., 'yearly'  ,'weights_era5_bilin.nc','','ERA5_LSM'
+   sn_apr      = 'ERA5_MSL'              ,          1        ,    'MSL'  ,    .true.   , .false., 'yearly'  ,'weights_era5_bicubic.nc','','ERA5_LSM'
 /
 
 /
