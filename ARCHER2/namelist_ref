@@ -283,7 +283,8 @@
    sn_prec     = 'ncar_precip.15JUNE2009_fill',   -1.        , 'PRC_MOD1',   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
    sn_snow     = 'ncar_precip.15JUNE2009_fill',   -1.        , 'SNOW'    ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
    sn_slp      = 'slp.15JUNE2009_fill'        ,    6.        , 'SLP'     ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
-!   sn_tdif     = 'taudif_core'                ,   24         , 'taudif'  ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
+   sn_tdif     = 'NOT USED'                   ,   24         , 'taudif'  ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
+   sn_cc       = 'NOT USED'                   ,   24         , 'CC'      ,   .false.   , .true. , 'yearly'  , 'weights_core_orca2_bilinear_noc.nc' , ''       , ''
 /
 !-----------------------------------------------------------------------
 &namsbc_cpl    !   coupled ocean/atmosphere model                       ("key_oasis3")
@@ -559,6 +560,7 @@
 !-----------------------------------------------------------------------
    !                       !  free slip  !   partial slip  !   no slip   ! strong slip
    rn_shlat    =  -9999.   !  shlat = 0  !  0 < shlat < 2  !  shlat = 2  !  2 < shlat
+   ln_shlat2d  = .false.   !  read shlat as a 2D coefficient in a file
    ln_vorlat   = .false.   !  consistency of vorticity boundary condition with analytical Eqs.
 /
 !-----------------------------------------------------------------------
