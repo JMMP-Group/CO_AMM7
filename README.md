@@ -57,7 +57,9 @@ Configuration differences between CO9_AMM15p2 and this configuration, CO9_AMM7
 |                 | NN_FCT_H=2 | NN_FCT_H=4 ||
 | **&NAMSBC**      | ln_traqsr   = .true. | ln_traqsr   = .true. | |
 |                  | ln_apr_dyn  = .true. | ln_apr_dyn  = .true. | |
+|                  | ln_lsm = 10          | ln_lsm = 1 | | 
 | **&namsbc_apr**  | ln_apr_obc  = .true. | ln_apr_obc  = .true. | |
+| 
  
 ---
 
