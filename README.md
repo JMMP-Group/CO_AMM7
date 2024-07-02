@@ -55,9 +55,9 @@ Configuration differences between CO9_AMM15p2 and this configuration, CO9_AMM7
 |                 |   -->  rn_bt_cmax   =  0.8 | --> nn_baro      = 30 ||
 | **&NAMTRA_ADV** |  LN_TRAADV_FCT=TRUE. |  LN_TRAADV_FCT=TRUE. | |
 |                 | NN_FCT_H=2 | NN_FCT_H=4 ||
-| **&NAMSBC**      | | ln_traqsr   = .true. | |
-|                  | | ln_apr_dyn  = .true. | |
-| **&namsbc_apr**  | | ln_apr_obc  = .true. | |
+| **&NAMSBC**      | ln_traqsr   = .true. | ln_traqsr   = .true. | |
+|                  | ln_apr_dyn  = .true. | ln_apr_dyn  = .true. | |
+| **&namsbc_apr**  | ln_apr_obc  = .true. | ln_apr_obc  = .true. | |
  
 ---
 
