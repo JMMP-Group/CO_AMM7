@@ -17,7 +17,7 @@ Model configurations are underpinned by the Nucleus for European Modelling of th
 <img src="https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/CO9_repo/CO9_AMM7_domain_bathy.jpg" width="600" >
 </p>
 
-|  **Configuration ** | **Specification** |
+|  **Configuration** | **Specification** |
 |-------------- | -------------- |
 | **Nemo-ocean repository** | http://forge.ipsl.jussieu.fr/nemo/svn/NEMO |
 | **Branch** | releases/r4.0/r4.0.2  Revision=13653|
@@ -31,6 +31,34 @@ Model configurations are underpinned by the Nucleus for European Modelling of th
 | **Time Step [s]** | 300 / 30 |
 | **Boundaries** | 2 sets of unstructured 2d and 3d open boundaries (1 for open ocean, 1 for Baltic) |
 
+Configuration differences between CO9_AMM15p2 and this configuration, CO9_AMM7
+
+|  **variable** | **CO9_AMM15p2** | **CO9_AMM7** | **Wise 4.0.2** |
+|-------------- | -------------- | --------------| --------------|
+| **&nam_tide** | 35 FES | 16 TPXO | 16 TPXO |
+| **&NAMZDF_GLS** | NN_STAB_FUNC=1 (KC94) | NN_STAB_FUNC=2 (CanutoA) | |
+| **&NAMZDF_GLS** | RN_EPSMIN=1E-9  | RN_EPSMIN=1E-12 | |
+| **&NAMDRG_BOT** | RN_CD0=2.5E-3 | RN_CD0=1.E-3 | |
+| **&NAMTRA_LDF** | ln_traldf_blp=.true. | ln_traldf_lap=.true. | |
+|                 | ln_traldf_lev=.true. | ln_traldf_hor=.true. ||
+|                 | nn_ahm_ijk_t=0      | nn_ahm_ijk_t=0 ||
+|                 | rn_Ld=493           | rn_Ld=1000  ||
+|                 | rn_Ud=0.01          | rn_Ud=0.01 ||
+| **&NAMDYN_LDF** | ln_dynldf_blp=.true. | ln_dynldf_blp=.true. ||
+|                 | ln_dynldf_lev=.true. | ln_dynldf_lev=.true. ||
+|                 | nn_ahm_ijk_t=31     | nn_ahm_ijk_t=0 ||
+|                 | rn_Lv=493           | rn_Lv=1000  ||
+|                 | rn_Uv=0.01          | rn_Uv=0.012 ||
+| **&NAMDYN_SPG** | ln_dynspg_ts=.true. | ln_dynspg_ts=.true. ||
+|                 |   ln_bt_fw=.FALSE.  |  ln_bt_fw=.TRUE.   | |
+|                 |   ln_bt_auto=.TRUE. |  ln_bt_auto=.FALSE. ||
+|                 |   -->  rn_bt_cmax   =  0.8 | --> nn_baro      = 30 ||
+| **&NAMTRA_ADV** |  LN_TRAADV_FCT=TRUE. |  LN_TRAADV_FCT=TRUE. | |
+|                 | NN_FCT_H=2 | NN_FCT_H=4 ||
+| **&NAMSBC**      | | ln_traqsr   = .true. | |
+|                  | | ln_apr_dyn  = .true. | |
+| **&namsbc_apr**  | | ln_apr_obc  = .true. | |
+ 
 ---
 
 ## Install guidance:
