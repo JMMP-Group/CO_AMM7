@@ -14,16 +14,16 @@ Model configurations are underpinned by the Nucleus for European Modelling of th
 
 ## Configuration
 <p align="center">
-<img src="https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/CO9_repo/CO9_AMM7_domain_bathy.jpg" width="600" >
+<img src="https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/CO9_repo/CO9_AMM7_domain_bathy.jpg" width="600" >
 </p>
 
 |  **Configuration** | **Specification** |
 |-------------- | -------------- |
 | **Nemo-ocean repository** | http://forge.ipsl.jussieu.fr/nemo/svn/NEMO |
-| **Branch** | releases/r4.0/r4.0.2  Revision=13653|
+| **Branch** | releases/r4.0/r4.0.4  Revision=13653|
 | **Components** | OCE |
 | **CPP keys** | key_mpp_mpi key_nosignedzero key_iomput |
-| **Grid** | ORCA |
+| **Grid** | AMM7 |
 | **Resolution** | 7 km |
 | **Horizontal Gridpoints** | 111,375 (y=375, x=297) |
 | **Vertical Levels** | 51 |
