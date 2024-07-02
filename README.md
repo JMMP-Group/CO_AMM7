@@ -89,7 +89,8 @@ cd /work/n01/n01/$USER/CO_AMM7/CO9_AMM7_P2/nemo/cfgs/AMM7
 cp -rP EXPREF EXP01
 
 cd /work/n01/n01/$USER/CO_AMM7/CO9_AMM7_P2/nemo/cfgs/AMM7/EXP01
-. /work/n01/n01/$USER/CO_AMM7/scripts/setup/setup_P2_files.sh
+#. /work/n01/n01/$USER/CO_AMM7/scripts/setup/setup_P2_files_from_JASMIN.sh   # download public files
+. /work/n01/n01/$USER/CO_AMM7/scripts/setup/setup_P2_files_from_ARCHER2.sh  # local files on ARCHER2
 
 cd EXP01
 cp /work/n01/n01/$USER/CO_AMM7/scripts/run/runscript.slurm .
