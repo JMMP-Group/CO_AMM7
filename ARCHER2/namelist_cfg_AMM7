@@ -85,7 +85,7 @@
 !-----------------------------------------------------------------------
    ln_read_cfg = .true.   !  (=T) read the domain configuration file
       !                    !  (=F) user defined configuration           (F => create/check namusr_def)
-      cn_domcfg = "./domain_cfg_MEs_L51_r10-07_opt_v2.nc" !"domain_cfg"  ! domain configuration filename
+      cn_domcfg = "domain_cfg"  ! domain configuration filename
       !
       ln_closea    = .false.    !  T => keep closed seas (defined by closea_mask field) in the  
       !                         !       domain and apply special treatment of freshwater fluxes.
@@ -106,7 +106,7 @@
    ln_tsd_init   = .true.         !  ocean initialisation
    ln_tsd_dmp    = .false.         !  T-S restoring   (see namtra_dmp)
    
-   cn_dir      = '/work/n01/n01/anwise/NEMO/VC_4.0.2/MODEL/nemo/cfgs/AMM7/ENSEMBLE_MEMBERS/MEs_L51_r10-07_opt_v2/'      !  root directory for the T-S data location
+   cn_dir      = './IC/'      !  root directory for the T-S data location
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
