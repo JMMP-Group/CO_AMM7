@@ -41,7 +41,7 @@ Configuration differences between CO9_AMM15p2 and this configuration, CO9_AMM7
 | **&NAMDRG_BOT** | RN_CD0=2.5E-3 | RN_CD0=1.E-3 | |
 | **&NAMTRA_LDF** | ln_traldf_blp=.true. | ln_traldf_lap=.true. | |
 |                 | ln_traldf_lev=.true. | ln_traldf_hor=.true. ||
-|                 | nn_ahm_ijk_t=0      | nn_ahm_ijk_t=0 ||
+|                 | nn_aht_ijk_t=0      | nn_aht_ijk_t=0 ||
 |                 | rn_Ld=493           | rn_Ld=1000  ||
 |                 | rn_Ud=0.01          | rn_Ud=0.01 ||
 | **&NAMDYN_LDF** | ln_dynldf_blp=.true. | ln_dynldf_blp=.true. ||
