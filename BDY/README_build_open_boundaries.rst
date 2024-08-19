@@ -4,6 +4,9 @@ build open boundaries
 Process to build open boundary files from GLOSEA6 data.
 location: JASMIN
 
+This process generates the BDY files from within the pyNEMO directory tree. Specifically within the `inputs` directory of that repository. 
+This folder contains the namelist and ncml files that need to be copied into the pyBDY inputs directory. These notes assume you are happy with this workflow.
+
 Because GLOSEA6 data are large we have an intermediate step to create a bigger-than-AMM-cut-out of daily files. The starting point here is access to these daily files and a domain configuration file for the cutout:
 
 ``ncdump -h mesh_mask_glosea6_amm15_subset.nc``
@@ -124,6 +127,29 @@ Following the guidance in the pyBDY repo E.g.::
     pip install -e .
 
 
+Prepare input files for pyBDY
+*****************************
+
+PyBDY doesn't like using ncml to read the expected `Bathymetry` variable from bathymetry file. So we make it manually from the domain configuration file (extract, rename and squeeze)::
+	
+	ncks -v mbathy,nav_lat,nav_lon /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc AMM7_mbathy_tmp.nc
+	ncwa -a t /gws/nopw/j04/jmmp/tmp_jelt/AMM7_mbathy_tmp.nc AMM7_mbathy.nc
+	ncrename -O -v mbathy,Bathymetry AMM7_mbathy.nc
+
+	mv AMM7_mbathy.nc pyBDY/inputs/.
+
+
+PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
+
+	ncks -v mbathy,nav_lat,nav_lon,nav_lev,e3u_0,e3v_0,e3w_0,e3t_0 /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc pyBDY/inputs/AMM7_zgr.nc
+	ncrename -O -v e3u_0,e3u pyBDY/inputs/AMM7_zgr.nc
+	ncrename -O -v e3v_0,e3v pyBDY/inputs/AMM7_zgr.nc
+	ncrename -O -v e3w_0,e3w pyBDY/inputs/AMM7_zgr.nc
+	ncrename -O -v e3t_0,e3t pyBDY/inputs/AMM7_zgr.nc
+
+Or use `inputs_AMM7_dst.ncml` ?? TEST AND RENAME TO *zgr*?
+
+
 Start from here if pyBDY is already built
 *****************************************
 
@@ -133,9 +159,11 @@ Load the environment variables and activate the python environment::
     export JVM_PATH=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/lib/amd64/server/libjvm.so
     micromamba activate pybdy
 
-Navigate to the BDY folder of this repository::
+The `CO_AMM7/BDY/` folder of this repository contains all the namelist and ncml files you need to generate boundary files from GLOSEA6 parent data (assuming you have that parent data). These files are copied to the `pyBDY/inputs/` directory. Assuming you clone `pyBDY` and `CO_AMM7` into the same directory, navigate there and copy the files::
 
-	cd CO_AMM7/BDY
+	cp CO_AMM7/BDY/*bdy pyBDY/inputs/.
+	cd pyBDY/inputs/
+
 
 The following is a template for how one could launch pyBDY on some data but will run out of memory or not so a batch of years::
 
@@ -143,7 +171,17 @@ The following is a template for how one could launch pyBDY on some data but will
 
 Runs out of memory --> try the lotus queue::
 
-	sbatch lotus_demo.sh 
+	sbatch lotus_demo.sh
+
+We want to create a lot of files but the java doesn't like handling too many files at once. It can do a month at a time so the plan is to create directories for each month of parent (src) data and loop over each month. Symbolic links are created for the parent data. This script is handled in the `lotus_glosea_to_amm7.sh` script.
+
+Edit the year and month(s) in `lotus_glosea_to_amm7.sh` and press go::
+
+	cd pyBDY/inputs
+	sbatch lotus_glosea_to_amm7.sh
+
+This will output ...
+If things go wrong check the nrct.log file and fix it.
 
 
 
