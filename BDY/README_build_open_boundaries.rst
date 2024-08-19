@@ -141,9 +141,10 @@ The following is a template for how one could launch pyBDY on some data but will
 
 	pybdy -s namelist_local_glosea6.bdy
 
-Runs out of memory --> try the lotus queue:
+Runs out of memory --> try the lotus queue::
 
-	sbatch lotus_glosea_to_amm7.sh 
+	sbatch lotus_demo.sh 
+
 
 
 
