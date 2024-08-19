@@ -133,4 +133,18 @@ Load the environment variables and activate the python environment::
     export JVM_PATH=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/lib/amd64/server/libjvm.so
     micromamba activate pybdy
 
+Navigate to the BDY folder of this repository::
+
+	cd CO_AMM7/BDY
+
+The following is a template for how one could launch pyBDY on some data but will run out of memory or not so a batch of years::
+
+	pybdy -s namelist_local_glosea6.bdy
+
+Runs out of memory --> try the lotus queue:
+
+	sbatch lotus_glosea_to_amm7.sh 
+
+
+
 
