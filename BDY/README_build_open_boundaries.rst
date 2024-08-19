@@ -1,5 +1,5 @@
 build open boundaries
-*********************
+**********************
 
 Process to build open boundary files from GLOSEA6 data.
 location: JASMIN
