@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf title="aggregation example" xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+  <aggregation type="union" >
+     <netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+        <aggregation type="joinExisting" dimName="time_counter" >
+           <!-- scan location="/gws/nopw/j04/jmmp/MASS/GloSea6/Daily/" regExp=".*grid_T.*" /> -->^
+           <scan location="./SYMLINK_DIR/__YEAR__/__MONTH__/" regExp=".*grid_T.*" /> -->^
+        </aggregation>
+     </netcdf>
+     <netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+        <aggregation type="joinExisting" dimName="time_counter" >
+           <scan location="./SYMLINK_DIR/__YEAR__/__MONTH__/" regExp=".*grid_U.*" />
+        </aggregation>
+     </netcdf>
+     <netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+        <aggregation type="joinExisting" dimName="time_counter" >
+           <scan location="./SYMLINK_DIR/__YEAR__/__MONTH__/" regExp=".*grid_V.*" />
+        </aggregation>
+     </netcdf>
+  </aggregation>
+</netcdf>
