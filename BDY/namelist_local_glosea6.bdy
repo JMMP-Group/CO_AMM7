@@ -32,16 +32,16 @@
 !------------------------------------------------------------------------------
    sn_src_hgr = '/gws/nopw/j04/jmmp/tmp_jelt/mesh_mask_cutout_for_dir_AMMregion_flatten_gdept_0.nc'
    sn_src_zgr = '/gws/nopw/j04/jmmp/tmp_jelt/mesh_mask_cutout_for_dir_AMMregion_flatten_gdept_0.nc'
-   sn_dst_hgr = '/gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc' 
-   sn_dst_zgr = '/gws/nopw/j04/jmmp/tmp_jelt/AMM7_zgr.nc'
+   sn_dst_hgr = './domain_cfg_co9amm7_MEsL51r10-07.nc' 
+   sn_dst_zgr = './domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc'
    sn_src_msk = '/gws/nopw/j04/jmmp/tmp_jelt/mesh_mask_cutout_for_dir_AMMregion_flatten_gdept_0.nc'
-   sn_bathy   = 'domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc' 
+   sn_bathy   = './domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc' 
 
 !------------------------------------------------------------------------------
 !  I/O
 !------------------------------------------------------------------------------
-   sn_src_dir = 'src_data_local_glosea6_regexp.ncml' ! src_files/'
-   sn_dst_dir = '/home/users/jelt/GitHub/pyBDY/outputs'
+   sn_src_dir = './src_data_local_glosea6_regexp.ncml' ! src_files/'
+   sn_dst_dir = './outputs'
    sn_fn      = 'AMM7_GLOSEA6'             ! prefix for output files
    nn_fv      = -1e20                 !  set fill value for output files
    nn_src_time_adj = 0                ! src time adjustment
