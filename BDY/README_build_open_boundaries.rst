@@ -123,7 +123,25 @@ Following the guidance in the pyBDY repo E.g.::
     export JVM_PATH=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/lib/amd64/server/libjvm.so
     
     (had to manually find libjvm.so and set it)
-    
+
+    I had some issues with JAVA on JASMIN, which I couldn't solve in a general way so I commented out the bits I didn't need:
+
+    comment out `pyBDY/src/pybdy/profiler.py`::
+
+	line35 
+	# from PyQt5.QtWidgets import QMessageBox
+
+	lines 506-508
+	# QMessageBox.warning(
+        #     None, "NRCT", "Mask is not set, setting a 1 grid " + "point border mask"
+        #)
+
+    Fix `pyBDY/src/pybdy/nemo_bdy_extr_tm3.py`::
+
+	line 823
+	-                dst_bdy = np.zeros_like(dist_fac)
+	+                dst_bdy = np.zeros_like(dist_fac) * np.nan
+
     pip install -e .
 
 
@@ -133,8 +151,8 @@ Prepare input files for pyBDY
 PyBDY doesn't like using ncml to read the expected `Bathymetry` variable from bathymetry file. So we make it manually from the domain configuration file (pyBDY expects variables: nav_lat, nav_lon and Bathymetry)::
 	
 	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc pyBDY/inputs/.
-	python generate_bathymetry.py
-	mv domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc pyBDY/inputs/.
+	python CO_AMM7/BDY/generate_bathymetry.py
+	mv domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc pyBDY/inputs/.  # if not already there
 
 
 PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
@@ -157,19 +175,21 @@ Load the environment variables and activate the python environment::
     export JVM_PATH=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/lib/amd64/server/libjvm.so
     micromamba activate pybdy
 
-The `CO_AMM7/BDY/` folder of this repository contains all the namelist and ncml files you need to generate boundary files from GLOSEA6 parent data (assuming you have that parent data). These files are copied to the `pyBDY/inputs/` directory. Assuming you clone `pyBDY` and `CO_AMM7` into the same directory, navigate there and copy the files::
+The `CO_AMM7/BDY/` folder of this repository contains all the scripts, namelist and ncml files you need to generate boundary files from GLOSEA6 parent data (assuming you have that parent data). These files are copied to the `pyBDY/inputs/` directory. Assuming you clone `pyBDY` and `CO_AMM7` into the same directory, navigate there and copy the files::
 
 	cp CO_AMM7/BDY/*bdy pyBDY/inputs/.
+	cp CO_AMM7/BDY/*ncml pyBDY/inputs/.
+	cp CO_AMM7/BDY/*sh pyBDY/inputs/.
 	cd pyBDY/inputs/
 
 
 The following is a template for how one could launch pyBDY on some data but will run out of memory or not so a batch of years::
 
-	pybdy -s namelist_local_glosea6.bdy
+	pybdy -s inputs/namelist_local_glosea6.bdy
 
 Runs out of memory --> try the lotus queue::
 
-	sbatch lotus_demo.sh
+	sbatch inputs/lotus_demo.sh
 
 We want to create a lot of files but the java doesn't like handling too many files at once. It can do a month at a time so the plan is to create directories for each month of parent (src) data and loop over each month. Symbolic links are created for the parent data. This script is handled in the `lotus_glosea_to_amm7.sh` script.
 
