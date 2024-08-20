@@ -130,13 +130,11 @@ Following the guidance in the pyBDY repo E.g.::
 Prepare input files for pyBDY
 *****************************
 
-PyBDY doesn't like using ncml to read the expected `Bathymetry` variable from bathymetry file. So we make it manually from the domain configuration file (extract, rename and squeeze)::
+PyBDY doesn't like using ncml to read the expected `Bathymetry` variable from bathymetry file. So we make it manually from the domain configuration file (pyBDY expects variables: nav_lat, nav_lon and Bathymetry)::
 	
-	ncks -v mbathy,nav_lat,nav_lon /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc AMM7_mbathy_tmp.nc
-	ncwa -a t /gws/nopw/j04/jmmp/tmp_jelt/AMM7_mbathy_tmp.nc AMM7_mbathy.nc
-	ncrename -O -v mbathy,Bathymetry AMM7_mbathy.nc
-
-	mv AMM7_mbathy.nc pyBDY/inputs/.
+	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc .
+	python generate_bathymetry.py
+	mv domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc pyBDY/inputs/.
 
 
 PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
