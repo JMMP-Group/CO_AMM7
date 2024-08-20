@@ -135,12 +135,6 @@ Following the guidance in the pyBDY repo E.g.::
         #     None, "NRCT", "Mask is not set, setting a 1 grid " + "point border mask"
         #)
 
-    Fix `pyBDY/src/pybdy/nemo_bdy_extr_tm3.py`::
-
-	line 823
-	-                dst_bdy = np.zeros_like(dist_fac)
-	+                dst_bdy = np.zeros_like(dist_fac) * np.nan
-
     Then install::
 
     	pip install -e .
