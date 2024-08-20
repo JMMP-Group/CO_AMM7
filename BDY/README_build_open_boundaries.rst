@@ -132,7 +132,7 @@ Prepare input files for pyBDY
 
 PyBDY doesn't like using ncml to read the expected `Bathymetry` variable from bathymetry file. So we make it manually from the domain configuration file (pyBDY expects variables: nav_lat, nav_lon and Bathymetry)::
 	
-	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc .
+	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc pyBDY/inputs/.
 	python generate_bathymetry.py
 	mv domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc pyBDY/inputs/.
 
