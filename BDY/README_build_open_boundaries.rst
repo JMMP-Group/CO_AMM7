@@ -164,6 +164,30 @@ PyBDy expects particular variables (``e3u`` not ``e3u_0`` etc) in the file for t
 NB use of NCML renaming magic (e.g. ``inputs_AMM7_dst_zgr.ncml``) doesn't seem to work as an input for namelist variable ``sn_dst_zgr``. 
 
 
+
+If I don't make a boundary mask then it doesn't work... This can also be done with the PyNEMO GUI. The mask variable takes values (-1 mask, 1 wet, 0 land). Get a template from domain_cfg.nc and then modify as desired around the boundary.
+
+For this domain there was an issue with the top right corner being too near the amphidrome (I think) so I chopped it out here::
+	
+	module load jaspy
+	rm -f bdy_mask.nc tmp[12].nc
+	ncks -v top_level domain_cfg.nc tmp1.nc
+	ncrename -h -v top_level,mask tmp1.nc tmp2.nc
+	ncwa -a t tmp2.nc bdy_mask.nc
+	rm -f tmp[12].nc
+
+In ipython::
+	
+	import netCDF4, numpy
+	dset = netCDF4.Dataset('bdy_mask.nc','a')
+	dset.variables['mask'][0,:]  = -1     # Southern boundary
+	dset.variables['mask'][-1,:] = -1    # Northern boundary
+	dset.variables['mask'][:,-1] = -1    # Eastern boundary
+	dset.variables['mask'][:,0] = -1        # Western boundary
+	dset.close()
+
+
+
 Start from here if pyBDY is already built
 *****************************************
 
