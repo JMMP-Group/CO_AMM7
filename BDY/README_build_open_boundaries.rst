@@ -153,8 +153,9 @@ PyBDY doesn't like using ncml to read the expected `Bathymetry` variable from ba
 	
 	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc CO_AMM7/BDY/.
 	cd CO_AMM7/BDY
-        python CO_AMM7/BDY/generate_bathymetry.py
-	mv domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc .
+        python generate_bathymetry.py
+
+This creates file `domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc`.
 
 
 PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
@@ -165,7 +166,7 @@ PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the d
 	ncrename -O -v e3w_0,e3w CO_AMM7/BDY/AMM7_zgr.nc
 	ncrename -O -v e3t_0,e3t CO_AMM7/BDY/AMM7_zgr.nc
 
-Or use `inputs_AMM7_dst.ncml` ?? TEST AND RENAME TO *zgr*?
+Or use `inputs_AMM7_dst_zgr.ncml` ?? TEST 
 
 
 Start from here if pyBDY is already built
