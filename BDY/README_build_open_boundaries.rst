@@ -160,13 +160,14 @@ This creates file `domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc`.
 
 PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
 
-	ncks -v mbathy,nav_lat,nav_lon,nav_lev,e3u_0,e3v_0,e3w_0,e3t_0 /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc CO_AMM7/BDY/AMM7_zgr.nc
-	ncrename -O -v e3u_0,e3u CO_AMM7/BDY/AMM7_zgr.nc
-	ncrename -O -v e3v_0,e3v CO_AMM7/BDY/AMM7_zgr.nc
-	ncrename -O -v e3w_0,e3w CO_AMM7/BDY/AMM7_zgr.nc
-	ncrename -O -v e3t_0,e3t CO_AMM7/BDY/AMM7_zgr.nc
+	module load jaspy
+	ncks -v mbathy,nav_lat,nav_lon,nav_lev,e3u_0,e3v_0,e3w_0,e3t_0 domain_cfg_co9amm7_MEsL51r10-07.nc domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3u_0,e3u domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3v_0,e3v domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3w_0,e3w domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3t_0,e3t domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
 
-Or use `inputs_AMM7_dst_zgr.ncml` ?? TEST 
+NB use of NCML renaming magic (e.g. `inputs_AMM7_dst_zgr.ncml`) doesn't seem to work for this input `sn_dst_zgr`. 
 
 
 Start from here if pyBDY is already built
