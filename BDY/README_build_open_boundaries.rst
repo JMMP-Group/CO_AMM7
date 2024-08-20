@@ -143,16 +143,16 @@ Following the guidance in the pyBDY repo E.g.::
 Prepare input files for pyBDY
 *****************************
 
-PyBDY doesn't like using ncml to read the expected `Bathymetry` variable from bathymetry file. So we make it manually from the domain configuration file (pyBDY expects variables: nav_lat, nav_lon and Bathymetry)::
+PyBDY doesn't like using ncml to read the expected ``Bathymetry`` variable from bathymetry file. So we make it manually from the domain configuration file (pyBDY expects variables: ``nav_lat``, ``nav_lon`` and ``Bathymetry``)::
 	
 	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc CO_AMM7/BDY/.
 	cd CO_AMM7/BDY
         python generate_bathymetry.py
 
-This creates file `domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc`.
+This creates file ``domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc``.
 
 
-PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
+PyBDy expects particular variables (``e3u`` not ``e3u_0`` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
 
 	module load jaspy
 	ncks -v mbathy,nav_lat,nav_lon,nav_lev,e3u_0,e3v_0,e3w_0,e3t_0 domain_cfg_co9amm7_MEsL51r10-07.nc domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
@@ -161,7 +161,7 @@ PyBDy expects particular variables (`e3u` not `e3u_0` etc) in the file for the d
 	ncrename -O -v e3w_0,e3w domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
 	ncrename -O -v e3t_0,e3t domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
 
-NB use of NCML renaming magic (e.g. `inputs_AMM7_dst_zgr.ncml`) doesn't seem to work for this input `sn_dst_zgr`. 
+NB use of NCML renaming magic (e.g. ``inputs_AMM7_dst_zgr.ncml``) doesn't seem to work as an input for namelist variable ``sn_dst_zgr``. 
 
 
 Start from here if pyBDY is already built
@@ -173,7 +173,7 @@ Load the environment variables and activate the python environment::
     export JVM_PATH=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/lib/amd64/server/libjvm.so
     micromamba activate pybdy
 
-The `CO_AMM7/BDY/` folder of this repository contains all the scripts, namelist and ncml files you need to generate boundary files from GLOSEA6 parent data (assuming you have that parent data)::
+The ``CO_AMM7/BDY/`` folder of this repository contains all the scripts, namelist and ncml files you need to generate boundary files from GLOSEA6 parent data (assuming you have that parent data)::
 
 The following is a template for how one could launch pyBDY on some data but will run out of memory or not so a batch of years::
 
@@ -184,7 +184,7 @@ Runs out of memory --> try the lotus queue::
 
 	sbatch lotus_demo.sh
 
-We want to create a lot of files but the java doesn't like handling too many files at once. It can do a month at a time so the plan is to create directories for each month of parent (src) data and loop over each month. Symbolic links are created for the parent data. This script is handled in the `lotus_glosea_to_amm7.sh` script.
+We want to create a lot of files but the java doesn't like handling too many files at once. It can do a month at a time so the plan is to create directories for each month of parent (src) data and loop over each month. Symbolic links are created for the parent data. This script is handled in the ``lotus_glosea_to_amm7.sh`` script.
 
 Edit the year and month(s) in `lotus_glosea_to_amm7.sh` and press go::
 
@@ -192,7 +192,7 @@ Edit the year and month(s) in `lotus_glosea_to_amm7.sh` and press go::
 	sbatch lotus_glosea_to_amm7.sh
 
 This will output ...
-If things go wrong check the nrct.log file and fix it.
+If things go wrong check the ``nrct.log file`` and fix it.
 
 
 
