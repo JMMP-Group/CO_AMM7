@@ -67,7 +67,7 @@ But ``pyBDY`` expects ``gdept_0(t, z, y, x)`` to be ``gdept_0(t, z)``. Since thi
 	import xarray as xr
 	ds = xr.load_dataset("/gws/nopw/j04/jmmp/MASS/GloSea6/Grid/mesh_mask_glosea6_amm15_subset.nc")
 	ds['gdept_0'] = ds.gdept_0.mean(dim='x').mean(dim='y')
-	ds.to_netcdf("mesh_mask_glosea6_amm15_subset_flatten_gdept_0.nc")
+	ds.to_netcdf("mesh_mask_cutout_for_AMMregion_flatten_gdept_0.nc")
 
 
 
