@@ -3,17 +3,17 @@
 # domain_cfg.nc
 ln -s /work/n01/n01/anwise/NEMO/VC_4.0.2/MODEL/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/DOM/domain_cfg_MEs_L51_r10-07_opt_v2.nc domain_cfg.nc
 
-# bdy coordinate files
-ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/coordinates.bdy.nc coordinates.bdy.nc
-ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/coordinates.skagbdy.nc coordinates.skagbdy.nc
+# bdy coordinate files (to be updated)
+#ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/coordinates.bdy.nc coordinates.bdy.nc
+#ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/coordinates.skagbdy.nc coordinates.skagbdy.nc
 
 
 # RESTART FOR ... 
 #ln -s /work/n01/n01/shared/CO_AMM15/P1_INPUTS/FORCING/RESTART/RESTART_BASED_ONCO7_20040101_TO_GEG_NICO_BALTIC_BLOCK_BUT_10M_MIN_RIV_DEP INITIAL_RESTART
 
-#INIT CONDITION
+#INIT CONDITION (to be updated)
 mkdir IC
-ln -s /work/n01/n01/anwise/NEMO/VC_4.0.2/MODEL/nemo/cfgs/AMM7/ENSEMBLE_MEMBERS/MEs_L51_r10-07_opt_v2/initcd_y2005m01.nc IC/.
+#ln -s /work/n01/n01/anwise/NEMO/VC_4.0.2/MODEL/nemo/cfgs/AMM7/ENSEMBLE_MEMBERS/MEs_L51_r10-07_opt_v2/initcd_y2005m01.nc IC/.
 
 #RIVERS
 ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/RIV .
