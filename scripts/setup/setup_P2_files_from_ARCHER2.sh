@@ -21,8 +21,8 @@ ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/RIV
 # BDY, TIDE and ERA5 forcing
 ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/TIDE .
 ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/SBC .
-ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/BDY_SKAG .
-ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/BDY .
+#ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/BDY_SKAG .  # to be updated
+#ln -s /work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/BDY .       # to be updated
 
 # make sure directory for outputting RESTART files exists
 mkdir RESTARTS
