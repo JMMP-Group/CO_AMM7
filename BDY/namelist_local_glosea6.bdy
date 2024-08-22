@@ -30,11 +30,11 @@
 !------------------------------------------------------------------------------
 !  grid information
 !------------------------------------------------------------------------------
-   sn_src_hgr = '/gws/nopw/j04/jmmp/tmp_jelt/mesh_mask_cutout_for_dir_AMMregion_flatten_gdept_0.nc'
-   sn_src_zgr = '/gws/nopw/j04/jmmp/tmp_jelt/mesh_mask_cutout_for_dir_AMMregion_flatten_gdept_0.nc'
+   sn_src_hgr = './mesh_mask_cutout_for_AMMregion_flatten_gdept_0.nc'
+   sn_src_zgr = './mesh_mask_cutout_for_AMMregion_flatten_gdept_0.nc'
    sn_dst_hgr = './domain_cfg_co9amm7_MEsL51r10-07.nc' 
    sn_dst_zgr = './domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc'
-   sn_src_msk = '/gws/nopw/j04/jmmp/tmp_jelt/mesh_mask_cutout_for_dir_AMMregion_flatten_gdept_0.nc'
+   sn_src_msk = './mesh_mask_cutout_for_AMMregion_flatten_gdept_0.nc' 
    sn_bathy   = './domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc' 
 
 !------------------------------------------------------------------------------
@@ -54,7 +54,7 @@
     cn_coords_file = 'coordinates.bdy.nc' !  name of bdy coordinates files
                                           !  (if ln_coords_file=.TRUE.)
     ln_mask_file   = .false.              !  =T : read mask from file
-    cn_mask_file   = 'mask.nc'            !  name of mask file
+    cn_mask_file   = 'bdy_mask.nc'        !  name of mask file
                                           !  (if ln_mask_file=.TRUE.)
     ln_dyn2d       = .true.              !  boundary conditions for
                                           !  barotropic fields
@@ -83,16 +83,16 @@
 !------------------------------------------------------------------------------
     nn_year_000     = 1993        !  year start
     nn_year_end     = 1993        !  year end
-    nn_month_000    = 03          !  month start (default = 1 is years>1)
-    nn_month_end    = 03         !  month end (default = 12 is years>1)
+    nn_month_000    = 01          !  month start (default = 1 is years>1)
+    nn_month_end    = 01         !  month end (default = 12 is years>1)
     sn_dst_calendar = 'gregorian' !  output calendar format
     nn_base_year    = 1900        !  base year for time counter
     ln_time_interpolation = .true. !  set to false to use parent frequency and calender
                                    !  for monthly only
 	! location of TPXO7.2 data
-	sn_tide_grid_7p2   = '/home/users/jelt/GitHub/pyBDY/inputs/tpxo7.2/grid_tpxo7.2.nc'
-	sn_tide_h          = '/home/users/jelt/GitHub/pyBDY/inputs/tpxo7.2/h_tpxo7.2.nc'
-	sn_tide_u          = '/home/users/jelt/GitHub/pyBDY/inputs/tpxo7.2/u_tpxo7.2.nc'
+        sn_tide_grid_7p2   = '/gws/nopw/j04/jmmp/jmmp_collab/TPXO/7.2/grid_tpxo7.2.nc'
+        sn_tide_h          = '/gws/nopw/j04/jmmp/jmmp_collab/TPXO/7.2/h_tpxo7.2.nc'
+        sn_tide_u          = '/gws/nopw/j04/jmmp/jmmp_collab/TPXO/7.2/u_tpxo7.2.nc'
 	! location of TPXO9v5 data: single constituents per file
 	sn_tide_grid_9p5   = './inputs/TPXO9_atlas_v5_nc/grid_tpxo9_atlas_30_v5.nc'
 	sn_tide_dir        = './inputs/TPXO9_atlas_v5_nc/'
