@@ -185,13 +185,21 @@ Runs out of memory --> try the lotus queue::
 
 We want to create a lot of files but the java doesn't like handling too many files at once. It can do a month at a time so the plan is to create directories for each month of parent (src) data and loop over each month. Symbolic links are created for the parent data. This script is handled in the ``lotus_glosea_to_amm7.sh`` script.
 
-Edit the year and month(s) in `lotus_glosea_to_amm7.sh` and press go::
+Edit the year and month(s) in ``lotus_glosea_to_amm7.sh`` and press go::
 
 	cd CO_AMM7/BDY
 	sbatch lotus_glosea_to_amm7.sh
 
-This will output ...
+This will output monthly files and a coordinates file e.g.::
+
+	coordinates.bdy.nc
+	AMM7_GLOSEA6_bdyT_y1993m01.nc
+	AMM7_GLOSEA6_bdyU_y1993m01.nc
+	AMM7_GLOSEA6_bdyV_y1993m01.nc
+
 If things go wrong check the ``nrct.log file`` and fix it.
+
+For tides follow the guidance in pyBDY. You need to get the source data, which I don't have set up on JASMIN so do not describe here.
 
 
 
