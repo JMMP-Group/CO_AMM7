@@ -6,7 +6,97 @@ location: JASMIN
 
 This process generates the BDY files from within the CO_AMM7/BDY directory. 
 
-Because GLOSEA6 data are large we have an intermediate step to create a bigger-than-AMM-cut-out of daily files. The starting point here is access to these daily files and a domain configuration file for the cutout:
+
+
+Build pyBDY
+***********
+
+Following the guidance in the pyBDY repo E.g.::
+
+    git clone https://github.com/NOC-MSM/pyBDY.git
+    cd pyBDY
+    micromamba env create -n pybdy -f environment.yml python=3.9
+    
+    micromamba activate pybdy
+    
+    # Lib/ dir is found 3 levels back from:
+    readlink -f $(which java)
+    
+    export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/
+    export JVM_PATH=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/lib/amd64/server/libjvm.so
+    
+    (had to manually find libjvm.so and set it)
+
+    I had some issues with JAVA on JASMIN, which I couldn't solve in a general way so I commented out the bits I didn't need:
+
+    Comment out `pyBDY/src/pybdy/profiler.py`::
+
+	line35 
+	# from PyQt5.QtWidgets import QMessageBox
+
+	lines 506-508
+	# QMessageBox.warning(
+        #     None, "NRCT", "Mask is not set, setting a 1 grid " + "point border mask"
+        #)
+
+    Then install::
+
+    	pip install -e .
+
+
+
+
+
+Prepare input files for pyBDY
+*****************************
+
+PyBDY doesn't like using ncml to read the expected ``Bathymetry`` variable from bathymetry file. So we make it manually from the domain configuration file (pyBDY expects variables: ``nav_lat``, ``nav_lon`` and ``Bathymetry``)::
+	
+	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc CO_AMM7/BDY/.
+	cd CO_AMM7/BDY
+        python generate_bathymetry.py
+
+This creates file ``domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc``.
+
+
+PyBDy expects particular variables (``e3u`` not ``e3u_0`` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
+
+	module load jaspy
+	ncks -v mbathy,nav_lat,nav_lon,nav_lev,e3u_0,e3v_0,e3w_0,e3t_0 domain_cfg_co9amm7_MEsL51r10-07.nc domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3u_0,e3u domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3v_0,e3v domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3w_0,e3w domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+	ncrename -O -v e3t_0,e3t domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
+
+NB use of NCML renaming magic (e.g. ``inputs_AMM7_dst_zgr.ncml``) doesn't seem to work as an input for namelist variable ``sn_dst_zgr``. 
+
+
+
+	FYI (but not used here). If the boundaries are not simply the edges of the domain, then a boundary mask can be used. This can also be generated with the PyNEMO GUI. The mask variable takes values (-1 mask, 1 wet, 0 land). Get a template from domain_cfg.nc and then modify as desired around the boundary::
+		
+		module load jaspy
+		rm -f bdy_mask.nc tmp[12].nc
+		ncks -v top_level domain_cfg.nc tmp1.nc
+		ncrename -h -v top_level,mask tmp1.nc tmp2.nc
+		ncwa -a t tmp2.nc bdy_mask.nc
+		rm -f tmp[12].nc
+	
+	Then in ipython::
+		
+		import netCDF4, numpy
+		dset = netCDF4.Dataset('bdy_mask.nc','a')
+		dset.variables['mask'][0,:]  = -1     # Southern boundary
+		dset.variables['mask'][-1,:] = -1    # Northern boundary
+		dset.variables['mask'][:,-1] = -1    # Eastern boundary
+		dset.variables['mask'][:,0] = -1        # Western boundary
+		dset.close()
+
+
+
+
+
+
+In this particular workflow an intermediate step is used to produce cut down version of the global data. A domain configuration file for the cutout needs to be prepared to have the expected variables::
 
 ``ncdump -h mesh_mask_glosea6_amm15_subset.nc``
 
@@ -68,90 +158,6 @@ But ``pyBDY`` expects ``gdept_0(t, z, y, x)`` to be ``gdept_0(t, z)``. Since thi
 	ds = xr.load_dataset("/gws/nopw/j04/jmmp/MASS/GloSea6/Grid/mesh_mask_glosea6_amm15_subset.nc")
 	ds['gdept_0'] = ds.gdept_0.mean(dim='x').mean(dim='y')
 	ds.to_netcdf("mesh_mask_cutout_for_AMMregion_flatten_gdept_0.nc")
-
-
-
-Build pyBDY
-***********
-
-Following the guidance in the pyBDY repo E.g.::
-
-    git clone https://github.com/NOC-MSM/pyBDY.git
-    cd pyBDY
-    micromamba env create -n pybdy -f environment.yml python=3.9
-    
-    micromamba activate pybdy
-    
-    # Lib/ dir is found 3 levels back from:
-    readlink -f $(which java)
-    
-    export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/
-    export JVM_PATH=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-1.el7_9.x86_64/jre/lib/amd64/server/libjvm.so
-    
-    (had to manually find libjvm.so and set it)
-
-    I had some issues with JAVA on JASMIN, which I couldn't solve in a general way so I commented out the bits I didn't need:
-
-    Comment out `pyBDY/src/pybdy/profiler.py`::
-
-	line35 
-	# from PyQt5.QtWidgets import QMessageBox
-
-	lines 506-508
-	# QMessageBox.warning(
-        #     None, "NRCT", "Mask is not set, setting a 1 grid " + "point border mask"
-        #)
-
-    Then install::
-
-    	pip install -e .
-
-
-Prepare input files for pyBDY
-*****************************
-
-PyBDY doesn't like using ncml to read the expected ``Bathymetry`` variable from bathymetry file. So we make it manually from the domain configuration file (pyBDY expects variables: ``nav_lat``, ``nav_lon`` and ``Bathymetry``)::
-	
-	cp /gws/nopw/j04/jmmp/public/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc CO_AMM7/BDY/.
-	cd CO_AMM7/BDY
-        python generate_bathymetry.py
-
-This creates file ``domain_cfg_co9amm7_MEsL51r10-07_bathmetry.nc``.
-
-
-PyBDy expects particular variables (``e3u`` not ``e3u_0`` etc) in the file for the destination vertical grid. Create a fake zgr mesh for AMM7::
-
-	module load jaspy
-	ncks -v mbathy,nav_lat,nav_lon,nav_lev,e3u_0,e3v_0,e3w_0,e3t_0 domain_cfg_co9amm7_MEsL51r10-07.nc domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
-	ncrename -O -v e3u_0,e3u domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
-	ncrename -O -v e3v_0,e3v domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
-	ncrename -O -v e3w_0,e3w domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
-	ncrename -O -v e3t_0,e3t domain_cfg_co9amm7_MEsL51r10-07_dst_zgr.nc
-
-NB use of NCML renaming magic (e.g. ``inputs_AMM7_dst_zgr.ncml``) doesn't seem to work as an input for namelist variable ``sn_dst_zgr``. 
-
-
-
-If I don't make a boundary mask then it doesn't work... This can also be done with the PyNEMO GUI. The mask variable takes values (-1 mask, 1 wet, 0 land). Get a template from domain_cfg.nc and then modify as desired around the boundary.
-
-For this domain there was an issue with the top right corner being too near the amphidrome (I think) so I chopped it out here::
-	
-	module load jaspy
-	rm -f bdy_mask.nc tmp[12].nc
-	ncks -v top_level domain_cfg.nc tmp1.nc
-	ncrename -h -v top_level,mask tmp1.nc tmp2.nc
-	ncwa -a t tmp2.nc bdy_mask.nc
-	rm -f tmp[12].nc
-
-In ipython::
-	
-	import netCDF4, numpy
-	dset = netCDF4.Dataset('bdy_mask.nc','a')
-	dset.variables['mask'][0,:]  = -1     # Southern boundary
-	dset.variables['mask'][-1,:] = -1    # Northern boundary
-	dset.variables['mask'][:,-1] = -1    # Eastern boundary
-	dset.variables['mask'][:,0] = -1        # Western boundary
-	dset.close()
 
 
 
