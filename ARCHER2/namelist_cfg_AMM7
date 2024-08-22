@@ -35,12 +35,12 @@
 !-----------------------------------------------------------------------
    nn_no       =       0   !  Assimilation cycle index
    cn_exp      =  "CO9_p2_AMM7"
-   nn_it000    =  8641 ! 16993 !  8641 ! 1   !  first time step
-   nn_itend    =  9505 !8640 !210240 !52128 !16992 !25920   ! 288 per 24hr   !  last  time step 
-   nn_date0    =  20050101   !  date at nit_0000 (format yyyymmdd) used if ln_rstart=F or (ln_rstart=T and nn_rstctl=0 or 1)
+   nn_it000    =  1 ! 16993 !  8641 ! 1   !  first time step
+   nn_itend    =  2880 !8640 !210240 !52128 !16992 !25920   ! 288 per 24hr   !  last  time step 
+   nn_date0    =  19930101   !  date at nit_0000 (format yyyymmdd) used if ln_rstart=F or (ln_rstart=T and nn_rstctl=0 or 1)
    nn_time0    =       0   !  initial time of day in hhmm
    nn_leapy    =       1   !  Leap year calendar (1) or not (0)
-   ln_rstart   =  .true.   !  start from rest (F) or from a restart file (T)
+   ln_rstart   =  .false.   !  start from rest (F) or from a restart file (T)
       nn_euler    =    1     !  = 0 : start with forward time step if ln_rstart=T
       nn_rstctl   =    2     !  restart control ==> activated only if ln_rstart=T
       !                          !    = 0 nn_date0 read in namelist ; nn_it000 : read in namelist
@@ -110,14 +110,8 @@
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   sn_tem      = 'initcd_y2005m01.nc',             -12.,        'toce',      .true.      ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
-   sn_sal      = 'initcd_y2005m01.nc',             -12.,        'soce',      .true.      ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
-! RMEOVE FROM REF?   nn_tsd_zone = 2  ! Set this to 5 and use the below parameters to create the temp profile used in SF12
-!   rn_sal_sf = 35.5 
-!   rn_mld_sf = 120
-!   rn_maxdep_sf = 5800
-!   rn_c0_sf = 3
-!   rn_c1_sf = 6
+   sn_tem      = 'ini_tem_glosea_amm7_19930101.nc', -1,     'votemper',      .false.   ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
+   sn_sal      = 'ini_sal_glosea_amm7_19930101.nc', -1,     'vosaline',      .false.   ,  .true., 'yearly'  ,    ''            ,    ''    ,    ''
 /
 !!======================================================================
 !!            ***  Surface Boundary Condition namelists  ***          !!
@@ -203,9 +197,8 @@
       rn_vfac     = 0.        !  multiplicative factor for ocean & ice velocity used to
       !                       !  calculate the wind stress (0.=absolute or 1.=relative winds)
 
-   !cn_dir      = './SBC/'           !  root directory for the fluxes data location
-   cn_dir = '/work/n01/n01/anwise/NEMO/VC_4.0.1/test/nemo/cfgs/AMM7/ENSEMBLE_INPUTS/SBC/'        !  root directory for the Patm data location
-
+   cn_dir      = './SBC/'           !  root directory for the fluxes data location
+/
    !___________!_________________________!___________________!___________!_____________!________!___________!______________________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename             ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                              ! pairing  !    filename   !
@@ -270,11 +263,11 @@
    !___________!_________________________!___________________!___________!_____________!_________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim   ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F)  ! 'monthly' !                  ! pairing  !    filename   !
-   sn_rnf      = 'rivers'                ,        24         , 'rorunoff',   .true.    , .false. , 'yearly'  , ''               , ''       , ''
+   sn_rnf      = 'jra_rivers_zlib'                ,        24         , 'rorunoff',   .true.    , .false. , 'yearly'  , ''               , ''       , ''
    !sn_cnf      = 'runoff_1m_nomask'      ,         0         , 'socoefr0',   .false.   , .true.  , 'yearly'  , ''               , ''       , ''
-   sn_s_rnf    = 'rivers'                ,        24         , 'rosaline',   .false.   , .false. , 'yearly'  , ''               , ''       , ''
-   sn_t_rnf    = 'rivers'                ,        24         , 'rotemper',   .false.   , .false. , 'yearly'  , ''               , ''       , ''
-   sn_dep_rnf  = 'rivers'                ,        24         , 'rodepth' ,   .false.   , .false. , 'yearly'  , ''               , ''       , ''
+   sn_s_rnf    = 'jra_rivers_zlib'                ,        24         , 'rosaline',   .false.   , .false. , 'yearly'  , ''               , ''       , ''
+   sn_t_rnf    = 'jra_rivers_zlib'                ,        24         , 'rotemper',   .false.   , .false. , 'yearly'  , ''               , ''       , ''
+   sn_dep_rnf  = 'jra_rivers_zlib'                ,        24         , 'rodepth' ,   .false.   , .false. , 'yearly'  , ''               , ''       , ''
 /
 !-----------------------------------------------------------------------
 &namsbc_apr    !   Atmospheric pressure used as ocean forcing           (ln_apr_dyn =T)
@@ -314,7 +307,7 @@
 !-----------------------------------------------------------------------
    ln_tide       = .true.   ! Activate tides
    ln_tide_pot   = .true.   !  use tidal potential forcing
-   ln_tide_ramp  = .false.
+   ln_tide_ramp  = .true.
       rdttideramp   = 1.
    dn_love_number   = 0.69
    clname(1)     =   'Q1'   !  name of constituent 
@@ -371,77 +364,58 @@
 &nambdy        !  unstructured open boundaries                          (default: OFF)
 !-----------------------------------------------------------------------
     ln_bdy         = .true.   !  Use unstructured open boundaries
-    nb_bdy         =  2       !  number of open boundary sets
+    nb_bdy         =  1       !  number of open boundary sets
     !
-    ln_coords_file = .true., .true.                                 !  =T : read bdy coordinates from file
-    cn_coords_file = 'coordinates.bdy.nc', 'coordinates.skagbdy.nc' !  bdy coordinates files
+    ln_coords_file = .true.                                !  =T : read bdy coordinates from file
+    cn_coords_file = 'BDY/coordinates.bdy.nc'!  bdy coordinates files
     ln_mask_file   = .false.                 !  =T : read mask from file
     cn_mask_file   = ''                      !  name of mask file (if ln_mask_file=.TRUE.)
-    cn_dyn2d       = 'flather', 'flather'    !
-    nn_dyn2d_dta   =  3,1                    !  = 0, bdy data are equal to the initial state
+    cn_dyn2d       = 'flather' 
+    nn_dyn2d_dta   =  3                    !  = 0, bdy data are equal to the initial state
                                              !  = 1, bdy data are read in 'bdydata   .nc' files
                                              !  = 2, use tidal harmonic forcing data from files
                                              !  = 3, use external data AND tidal harmonic forcing
-    cn_dyn3d      =  'zerograd','zerograd' ! 'zerograd','zerograd'   !
-    nn_dyn3d_dta  =  1, 1                    !  = 0, bdy data are equal to the initial state
+    cn_dyn3d      =  'zerograd' 
+    nn_dyn3d_dta  =  1                    !  = 0, bdy data are equal to the initial state
                                              !  = 1, bdy data are read in 'bdydata   .nc' files
-    cn_tra        =  'frs','frs' !'zerograd', 'zerograd'           
-    nn_tra_dta    =  1, 1                    !  = 0, bdy data are equal to the initial state
+    cn_tra        =  'frs' 
+    nn_tra_dta    =  1                     !  = 0, bdy data are equal to the initial state
                                              !  = 1, bdy data are read in 'bdydata   .nc' files
-    cn_ice        =  'none', 'none'          !
-    nn_ice_dta    =  0, 0                    !  = 0, bdy data are equal to the initial state
+    cn_ice        =  'none' 
+    nn_ice_dta    =  0                    !  = 0, bdy data are equal to the initial state
                                              !  = 1, bdy data are read in 'bdydata   .nc' files
-    ln_tra_dmp    =.false., .false.  !  open boudaries conditions for tracers
-    ln_dyn3d_dmp  =.false., .false.  !  open boundary condition for baroclinic velocities
-       rn_time_dmp   =  8., 8.                  ! Damping time scale in days
-       rn_time_dmp_out =  64., 64.              ! Outflow damping time scale
-    nn_rimwidth   = 10, 10                   !  width of the relaxation zone
+    ln_tra_dmp    =.false.  !  open boudaries conditions for tracers
+    ln_dyn3d_dmp  =.false.  !  open boundary condition for baroclinic velocities
+       rn_time_dmp   =  8.                  ! Damping time scale in days
+       rn_time_dmp_out =  64.              ! Outflow damping time scale
+    nn_rimwidth   = 10                   !  width of the relaxation zone
     ln_vol        = .false.                  !  total volume correction (see nn_volctl parameter)
     nn_volctl     = 1                        !  = 0, the total water flux across open boundaries is zero
 /
 !-----------------------------------------------------------------------
 &nambdy_ssh 
 !-----------------------------------------------------------------------
-  ln_ssh_bdy   = .true. , .true.
-  rn_ssh_shift =   0.   ,  0.
+  ln_ssh_bdy   = .true. 
+  rn_ssh_shift =   0.   
 /
 !-----------------------------------------------------------------------
 &nambdy_dta    !  open boundaries - external data                       
 !-----------------------------------------------------------------------
-   ln_zinterp  = .true.       !  T if a vertical interpolation is required. Variables gdep[tuv] and e3[tuv] must exist in the file
+   ln_zinterp  = .false.       !  T if a vertical interpolation is required. Variables gdep[tuv] and e3[tuv] must exist in the file
    !                          !  automatically defined to T if the number of vertical levels in bdy dta /= jpk
-   ln_full_vel = .false.       !  T if [uv]3d are "full" velocities and not only its baroclinic components
+   ln_full_vel = .true.       !  T if [uv]3d are "full" velocities and not only its baroclinic components
    !
    cn_dir  =    './BDY/'
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   bn_ssh      =    'amm7_bt_bdyT'       ,         24        , 'detrended_sossheig' ,    .true.     , .false. ,  'daily'  ,    ''    ,   ''  , ' '
-   bn_u2d      =    'amm7_bt_bdyU'       ,         24        , 'vobtcrtx',    .true.   , .false. ,  'daily'  ,    ''    ,   ''   ,   ''
-   bn_v2d      =    'amm7_bt_bdyV'       ,         24        , 'vobtcrty',    .true.   , .false. ,  'daily'  ,    ''    ,   ''   ,   ''
-   bn_u3d      =    'amm7_bdyU'          ,         24        , 'vozocrtx',    .true.   , .false. ,  'daily'  ,    ''    ,   ''   ,   ''
-   bn_v3d      =    'amm7_bdyV'          ,         24        , 'vomecrty',    .true.   , .false. ,  'daily'  ,    ''    ,   ''   ,   ''
-   bn_tem      =    'amm7_bdyT'          ,         24        , 'votemper',    .true.   , .false. ,  'daily'  ,    ''    ,   ''   ,   ''
-   bn_sal      =    'amm7_bdyT'          ,         24        , 'vosaline',    .true.   , .false. ,  'daily'  ,    ''    ,   ''   ,   ''
-/
-!-----------------------------------------------------------------------
-&nambdy_dta      !  open boundaries - external data           ("key_bdy")
-!-----------------------------------------------------------------------
-   ln_zinterp  = .true.       !  T if a vertical interpolation is required. Variables gdep[tuv] and e3[tuv] must exist in the file
-   !                          !  automatically defined to T if the number of vertical levels in bdy dta /= jpk
-   ln_full_vel = .false.       !  T if [uv]3d are "full" velocities and not only its baroclinic components
-   !
-   cn_dir  =    './BDY_SKAG/'
-   !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
-   !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
-   !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   bn_ssh      =  'SF51_bt_bdyT'     ,         24        , 'sossheig',     .true.  , .false.,  'daily'  ,    ''    ,   ''   ,  ''
-   bn_u2d      =  'SF51_bt_bdyU'     ,         24        , 'vobtcrtx',     .true.  , .false.,  'daily'  ,    ''    ,   ''   ,  ''
-   bn_v2d      =  'SF51_bt_bdyV'     ,         24        , 'vobtcrty',     .true.  , .false.,  'daily'  ,    ''    ,   ''   ,  ''
-   bn_u3d      =  'SF51_bdyU'        ,         24        , 'vozocrtx',     .true.  , .false.,  'daily'  ,    ''    ,   ''   ,  ''
-   bn_v3d      =  'SF51_bdyV'        ,         24        , 'vomecrty',     .true.  , .false.,  'daily'  ,    ''    ,   ''   ,  ''
-   bn_tem      =  'SF51_bdyT'        ,         24        , 'votemper',     .true.  , .false.,  'daily'  ,    ''    ,   ''   ,  ''
-   bn_sal      =  'SF51_bdyT'        ,         24        , 'vosaline',     .true.  , .false.,  'daily'  ,    ''    ,   ''   ,  ''
+   !bn_u2d      =    'AMM7_GLOSEA6_bdyU'  ,         24        , 'vobtcrtx',    .true.   , .false. ,  'monthly'  ,    ''    ,   ''   ,   ''
+   !bn_v2d      =    'AMM7_GLOSEA6_bdyV'  ,         24        , 'vobtcrty',    .true.   , .false. ,  'monthly'  ,    ''    ,   ''   ,   ''
+   bn_u3d      =    'AMM7_GLOSEA6_bdyU'  ,         24        , 'vozocrtx',    .true.   , .false. ,  'monthly'  ,    ''    ,   ''   ,   ''
+   bn_v3d      =    'AMM7_GLOSEA6_bdyV'  ,         24        , 'vomecrty',    .true.   , .false. ,  'monthly'  ,    ''    ,   ''   ,   ''
+   bn_tem      =    'AMM7_GLOSEA6_bdyT'  ,         24        , 'votemper',    .true.   , .false. ,  'monthly'  ,    ''    ,   ''   ,   ''
+   bn_sal      =    'AMM7_GLOSEA6_bdyT'  ,         24        , 'vosaline',    .true.   , .false. ,  'monthly'  ,    ''    ,   ''   ,   ''
+   bn_ssh      =    'AMM7_GLOSEA6_bdyT'  ,         24        , 'sossheig',    .true.   , .false. ,  'monthly'  ,    ''    ,   ''  , ' '
 /
 !-----------------------------------------------------------------------
 &nambdy_tide   !  tidal forcing at open boundaries
@@ -703,7 +677,7 @@
 !-----------------------------------------------------------------------
 &nam_dia25h    !  25h Mean Output                                       (default F)
 !-----------------------------------------------------------------------
-   ln_dia25h  = .false.    ! Choose 25h mean output or not
+   ln_dia25h  = .true.    ! Choose 25h mean output or not
 /
 !!======================================================================
 !!               ***  Observation & Assimilation  ***                 !!
