@@ -1,5 +1,5 @@
 Workflow for building initial conditions
-****************************************
+========================================
 
 Download the software tool and edit it::
 
@@ -26,36 +26,36 @@ Download the software tool and edit it::
 
 Create a python environment::
 
-  micromamba create -n ic_env python=3.10 xarray matplotlib numpy scipy h5netcdf
+      micromamba create -n ic_env python=3.10 xarray matplotlib numpy scipy h5netcdf
 
 
 Move into directory::
 
-  cd /home/users/jelt/GitHub/genNEMO/InitialConditions
+      cd /home/users/jelt/GitHub/genNEMO/InitialConditions
 
 
 Edit ``sub_jas.sh`` to use this environment (from line 13)::
 
-  # executable 
-  #python -u calc_mld.py
-  #conda activate coast
-  module load jaspy
-  micromamba activate ic_env
-  
-  python -u calc_ini_ts.py
+      #executable 
+      #python -u calc_mld.py
+      #conda activate coast
+      module load jaspy
+      micromamba activate ic_env
+      
+      python -u calc_ini_ts.py
 
 Execute::
 
-  sbatch sub_jas.sh
+      sbatch sub_jas.sh
 
 
-IT WORKS. Outputting::
+which, if all goes well, outputs::
   
-  glosea_ini_19930101_vosaline_domain_cfg_co9amm7_MEsL51r10-07.nc
-  glosea_ini_19930101_votemper_domain_cfg_co9amm7_MEsL51r10-07.nc
+      glosea_ini_19930101_vosaline_domain_cfg_co9amm7_MEsL51r10-07.nc
+      glosea_ini_19930101_votemper_domain_cfg_co9amm7_MEsL51r10-07.nc
 
 Copy to ``archer2:/work/n01/n01/jelt/CO_AMM7/CO9_AMM7_P2/nemo/cfgs/AMM7/EXP_glosea6/IC/``::
 
-  ssh archer2
-  cd /work/n01/n01/jelt/CO_AMM7/CO9_AMM7_P2/nemo/cfgs/AMM7/EXP_glosea6/IC
-  rsync -uvtr jelt@xfer1.jasmin.ac.uk:/home/users/jelt/GitHub/genNEMO/InitialConditions/glosea_ini_19930101_vo*nc .
+      ssh archer2
+      cd /work/n01/n01/jelt/CO_AMM7/CO9_AMM7_P2/nemo/cfgs/AMM7/EXP_glosea6/IC
+      rsync -uvtr jelt@xfer1.jasmin.ac.uk:/home/users/jelt/GitHub/genNEMO/InitialConditions/glosea_ini_19930101_vo*nc .
