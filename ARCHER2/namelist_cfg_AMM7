@@ -401,7 +401,7 @@
 !-----------------------------------------------------------------------
 &nambdy_dta    !  open boundaries - external data                       
 !-----------------------------------------------------------------------
-   ln_zinterp  = .false.       !  T if a vertical interpolation is required. Variables gdep[tuv] and e3[tuv] must exist in the file
+   ln_zinterp  = .true.       !  T if a vertical interpolation is required. Variables gdep[tuv] and e3[tuv] must exist in the file
    !                          !  automatically defined to T if the number of vertical levels in bdy dta /= jpk
    ln_full_vel = .true.       !  T if [uv]3d are "full" velocities and not only its baroclinic components
    !
