@@ -50,25 +50,28 @@ As an example the following process has been used on ARCHER2 using XIOS2 and the
 Get compiler option files using a shared XIOS2 install
 ```
 cd <path to your nemo install>/nemo_4.2.1
-cp /work/n01/shared/nemo/ARCH/*4.2.fcm arch/NOC/.
+cp <path to repo>/ARCH/arch-archer2_gnu arch/NOC/.
 ```
 Load appropriate modules
 ```
+module swap PrgEnv-cray PrgEnv-gnu
 module swap craype-network-ofi craype-network-ucx
 module swap cray-mpich cray-mpich-ucx
 module load cray-hdf5-parallel/1.12.2.1
 module load cray-netcdf-hdf5parallel/4.9.0.1
+module load libfabric
+
 
 ```
 Compile NEMO
 ```
-./makenemo -m X86_ARCHER2-Cray_4.2 -r AMM7 -j 16
+./makenemo -m arch-archer2_gnu -r AMM7 -j 16
 ```
 
 Create a link to xios in the EXP00 directory
 ```
 cd cfgs/AMM7
-ln -s /work/n01/shared/nemo/XIOS2_Cray/bin/xios_server.exe EXP00/xios_server.exe
+ln -s /work/n01/shared/nemo/XIOS2_Gnu/bin/xios_server.exe EXP00/xios_server.exe
 ```
 Create links to the nemo and xios executables from your reference experiment directory
 ```
@@ -84,7 +87,7 @@ Input files can then be downloaded to the nemo_4.2.1/cfgs/AMM7/INPUTS child dire
 
 |  **Input** | **Download Location** |
 |-------------- | -------------- |
-| **Domain_cfg.nc** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/CO9_repo/domain_cfg_co9amm7_MEsL51r10-07.nc |
+| **Domain_cfg.nc** | https://gws-access.jasmin.ac.uk/public/jmmp/AMM7/CO9_repo/domain_cfg_ME10_07_latfix_v3.nc |
 | **Open ocean boundary coordinates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/grid/coordinates.bdy.nc |
 | **Baltic coordimates.bdy.nc** | http://gws-access.jasmin.ac.uk/public/jmmp/AMM7/grid/coordinates.skagbdy.nc |
 
