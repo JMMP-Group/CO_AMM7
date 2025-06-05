@@ -78,3 +78,8 @@ Input files can then be downloaded into the experiment directory  and the config
 | **Initial condition** | https://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/IC/ |
 
 ---
+
+## NOTES
+
+### Land sea mask
+For the atmospheric boundary data a land sea mask can be applied to mask the data over land on the native atmospheric grid. This masked data can be filled by the user during preproccessing (effectively not applying a land sea mask) or the lasn sea mask can be supplied and NEMO can fill the relevent grid points at runtime. The namelist option nn_lsm specifies how the atmospheric data on the model grid is extrapolated from the unmasked data around the coastlines when a land sea mask is supplied. Although nn_lsm=1 should in prinicple be ok, it has been found that inconsistencies between model runs using different core setups can then accumulate. It is therefore recommended to fill the land points during preprocessing or set nn_lsm=10, which simply mean more model grid points are filled at runtime.
