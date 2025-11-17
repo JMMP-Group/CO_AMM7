@@ -1,0 +1,1 @@
+INPUTS/grid/coordinates.skagbdy.nc
